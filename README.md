@@ -1,6 +1,6 @@
 # BACKEND FOR PI 5
 
-In order to protect my pi 5 from unwanted access. I decided to write a GO based backend. This project will also be used as my portfolio in using GO language.
+In order to protect my pi 5 from unwanted access. I decided to write a GO based backend.
 
 # STRUCTURE OF THE PROJECT
 
