@@ -1,0 +1,18 @@
+database:
+  host: "localhost"
+  port: "5432"
+  user: ""
+  password: ""
+  dbname: ""
+  max_open_conns: 45
+  max_idle_conns: 15
+
+server:
+  port: "8080"
+  read_timeout: 60
+  write_timeout: 60
+
+app:
+  name: "Backend Service"
+  version: "1.0.0"
+  env: "production"
