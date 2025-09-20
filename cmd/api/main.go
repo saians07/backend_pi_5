@@ -43,7 +43,7 @@ func main() {
 	// start server
 	log.Info("Server starting on port " + cfg.Server.Port)
 	if err := http.ListenAndServe(":"+cfg.Server.Port, router); err != nil {
-		log.Fatal("Server failed to start: %v.", err)
+		log.Fatal("Server failed to start: %v", err)
 	}
 }
 
