@@ -9,7 +9,9 @@ import (
 func WriteJSONResponse(w http.ResponseWriter, statusCode int, response model.APIResponse) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+	}
 }
 
 func WriteErrorResponse(w http.ResponseWriter, statusCode int, message string) {

@@ -8,6 +8,7 @@ import (
 	"backend_pi_5/pkg/database"
 	"backend_pi_5/pkg/logger"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -42,7 +43,14 @@ func main() {
 
 	// start server
 	log.Info("Server starting on port " + cfg.Server.Port)
-	if err := http.ListenAndServe(":"+cfg.Server.Port, router); err != nil {
+	server := &http.Server{
+		Addr:         ":" + cfg.Server.Port,
+		Handler:      router,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  120 * time.Second,
+	}
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatal("Server failed to start: %v", err)
 	}
 }

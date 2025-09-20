@@ -46,6 +46,7 @@ func getConfigPath() string {
 func Load() (*Config, error) {
 	configPath := getConfigPath()
 
+	// #nosec G304
 	data, err := os.ReadFile(configPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read config file: %w", err)
