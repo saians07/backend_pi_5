@@ -55,7 +55,7 @@ jobs:
 
       - name: Check for vulnerabilities
         run: |
-          go install golang.org/x/vuln/govulncheck@latest
+          go install golang.org/x/vuln/cmd/govulncheck@latest
           govulncheck ./...
 
   test:
