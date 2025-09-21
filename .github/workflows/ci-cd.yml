@@ -166,7 +166,7 @@ jobs:
 
     steps:
       - name: Checkout code
-      - uses: actions/checkout@v4
+        uses: actions/checkout@v4
 
       - name: Setup Go
         uses: actions/setup-go@v4
@@ -200,6 +200,4 @@ jobs:
             bin/backend_pi_5
             bin/backend_pi_5-arm64
           retention-days: 30
-
-
-  
+      
