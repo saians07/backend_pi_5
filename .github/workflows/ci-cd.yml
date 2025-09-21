@@ -22,10 +22,10 @@ env:
 
 jobs:
   # CHECK CODE QUALITY AND SECURITY
+  # Executed on all situations
   code-quality:
     name: Code Quality & Security
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
 
     steps:
       - name: Checout code
@@ -65,6 +65,7 @@ jobs:
           govulncheck ./...
 
   # TESTING
+  # Executed on all situations
   test:
     name: Run tests
     runs-on: ubuntu-latest
@@ -124,10 +125,11 @@ jobs:
       #     DATABASE_URL: postgres://testuser:testpassword@localhost:5432/backend_pi_5_test?sslmode=disable
 
   # build binary and docker
+  # Build binary only get executed when we are releasing a tag or releasing a new version or doing push to branch master
   build:
     name: Build Application
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: github.event_name == 'release' || github.event_name == 'push'
     needs: [code-quality, test]
 
     outputs:
