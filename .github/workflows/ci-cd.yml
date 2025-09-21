@@ -6,12 +6,12 @@ on:
     branches: [master]
     paths-ignore:
       - 'README.md'
+    tags:
+      - 'v*'
   pull_request:
     branches: [master]
   release:
     types: [published, created]
-  tags:
-    - 'v*'
   workflow_dispatch:
 
 env:
