@@ -109,11 +109,12 @@ jobs:
           timeout 60s sh -c 'until nc -z localhost 5432; do sleep 1; done'
           timeout 60s sh -c 'until nc -z localhost 6379; do sleep 1; done'
       
-      - name: Run database migrations
-        run: |
-          go run cmd/migrate/main.go up
-        env:
-          DATABASE_URL: postgres://testuser:testpassword@localhost:5432/backend_pi_5_test?sslmode=disable
+      # TODO: Implement this migration capabilities
+      # - name: Run database migrations
+      #   run: |
+      #     go run cmd/migrate/main.go up
+      #   env:
+      #     DATABASE_URL: postgres://testuser:testpassword@localhost:5432/backend_pi_5_test?sslmode=disable
 
       - name: Run unit tests
         run: |
