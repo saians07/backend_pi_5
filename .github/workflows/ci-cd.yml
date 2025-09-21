@@ -115,6 +115,13 @@ jobs:
         env:
           DATABASE_URL: postgres://testuser:testpassword@localhost:5432/backend_pi_5_test?sslmode=disable
 
-      - 
+      - name: Run unit tests
+        run: |
+          go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+        env:
+          DATABASE_URL: postgres://testuser:testpassword@localhost:5432/backend_pi_5_test?sslmode=disable
+          REDIS_URL: redis://localhost:6379
+          ENV: test
+
           
   
