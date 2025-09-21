@@ -23,7 +23,7 @@ func ConnectDB(cfg config.DatabaseConfig) (*sql.DB, error) {
 	db.SetConnMaxLifetime(time.Hour)
 
 	if err := db.Ping(); err != nil {
-		return nil, fmt.Errorf("failed to ping database:", err)
+		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
 	return db, nil

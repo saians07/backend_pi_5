@@ -6,17 +6,23 @@ on:
     branches: [master]
     paths-ignore:
       - 'README.md'
+    tags:
+      - 'v*'
   pull_request:
     branches: [master]
+  release:
+    types: [published, created]
   workflow_dispatch:
 
 env:
-  GO_VERSION: '1.25'
+  GO_VERSION: '1.25.1'
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/backend_pi_5
   APP_NAME: backend_pi_5
 
 jobs:
+  # CHECK CODE QUALITY AND SECURITY
+  # Executed on all situations
   code-quality:
     name: Code Quality & Security
     runs-on: ubuntu-latest
@@ -39,25 +45,27 @@ jobs:
           go mod tidy
           git diff --exit-code go.mod go.sum
         
-      - name: Tun go vet
-        run: go vet ./..
+      - name: Run go vet
+        run: go vet ./...
 
       - name: Run staticcheck
         uses: dominikh/staticcheck-action@v1.4.0
         with:
-          version: "2023.1.6"
+          version: "latest"
           install-go: false
       
       - name: Run gosec (Security Scanner)
-        uses: securego/gosec@master
-        with:
-          args: ./..
+        run: |
+          go install github.com/securego/gosec/v2/cmd/gosec@latest
+          gosec ./...
 
       - name: Check for vulnerabilities
         run: |
-          go install golang.org/x/vuln/govulncheck@latest
-          govulncheck ./..
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
 
+  # TESTING
+  # Executed on all situations
   test:
     name: Run tests
     runs-on: ubuntu-latest
@@ -65,11 +73,11 @@ jobs:
 
     strategy:
       matrix:
-        go-version: ['1.24', '1.25']
+        go-version: ['1.24.0', '1.25.1']
 
     services:
       postgres:
-        image: postgres:15
+        image: postgres:17
         env:
           POSTGRES_PASSWORD: testpassword
           POSTGRES_USER: testuser
@@ -78,7 +86,7 @@ jobs:
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
-          --helath-retries 5
+          --health-retries 5
         ports:
           - 5432:5432
 
@@ -108,5 +116,61 @@ jobs:
         run:
           timeout 60s sh -c 'until nc -z localhost 5432; do sleep 1; done'
           timeout 60s sh -c 'until nc -z localhost 6379; do sleep 1; done'
-          
-  
+      
+      # TODO: Implement this migration capabilities
+      # - name: Run database migrations
+      #   run: |
+      #     go run cmd/migrate/main.go up
+      #   env:
+      #     DATABASE_URL: postgres://testuser:testpassword@localhost:5432/backend_pi_5_test?sslmode=disable
+
+  # build binary and docker
+  # Build binary only get executed when we are releasing a tag or releasing a new version or doing push to branch master
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' || github.event_name == 'push'
+    needs: [code-quality, test]
+
+    outputs:
+      image: ${{ steps.build.outputs.image }}
+      digest: ${{ steps.build.outputs.digest }}
+      version: ${{ steps.build.outputs.version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Generate version
+        id: version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(echo $GITHUB_SHA | cut -c1-8)
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+      
+      - name: Build ARM64 binary (for Raspberry Pi)
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build \
+          -ldflags="-X main.Version=${{ steps.version.outputs.version }} -X main.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ) -s -w" \
+          -o bin/backend_pi_5-arm64 \
+          ./cmd/api
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries
+          path: |
+            bin/backend_pi_5
+            bin/backend_pi_5-arm64
+          retention-days: 30
+
