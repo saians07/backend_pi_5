@@ -180,7 +180,7 @@ jobs:
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
           else
-            VERSION=${echo $GITHUB_SHA | cut -c1-8}
+            VERSION=$(echo $GITHUB_SHA | cut -c1-8)
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Building version: $VERSION"
