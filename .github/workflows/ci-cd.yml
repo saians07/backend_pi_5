@@ -127,7 +127,7 @@ jobs:
   build:
     name: Build Application
     runs-on: ubuntu-latest
-    # if: github.event_name == 'push'
+    if: startsWith(github.ref, 'refs/tags/')
     needs: [code-quality, test]
 
     outputs:
@@ -171,3 +171,10 @@ jobs:
             bin/backend_pi_5
             bin/backend_pi_5-arm64
           retention-days: 30
+
+notes: |
+  This github action consists of 4 stages:
+    * Code quality check : Only trigger once at Pull Request
+    * Code test: trigger on PR, push, tags, and release
+    * Code build binary and docker: triger on tags and release
+    * Code deploy: trigger on release only
