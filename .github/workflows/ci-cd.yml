@@ -1,13 +1,24 @@
+notes: |
+  This github action consists of 4 stages:
+    * Code quality check : Only trigger once at Pull Request
+    * Code test: trigger on PR, push, tags, and release
+    * Code build binary and docker: triger on tags and release
+    * Code deploy: trigger on release only
+
 name: backend_pi_5 CI/CD Pipeline
 
 # trigger events
 on:
   push:
     branches: [master]
+    tags:
+      - 'v*'
     paths-ignore:
       - 'README.md'
   pull_request:
     branches: [master]
+  release:
+    types: [published, created]
   workflow_dispatch:
 
 env:
@@ -21,6 +32,7 @@ jobs:
   code-quality:
     name: Code Quality & Security
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
 
     steps:
       - name: Checout code
@@ -118,41 +130,7 @@ jobs:
       #   env:
       #     DATABASE_URL: postgres://testuser:testpassword@localhost:5432/backend_pi_5_test?sslmode=disable
 
-  # TODO: Implement benchmarking
-  # benchmark:
-  #   name: Run benchmark
-  #   runs-on: ubuntu-latest
-  #   needs: code-quality
-  #   if: github.event_name == 'pull_request'
-
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-
-  #     - name: Setup Go
-  #       uses: actions/setup-go@v4
-  #       with:
-  #         go-version: ${{ env.GO_VERSION }}
-  #         cache: true
-
-  #     - name: Run benchmark
-  #       run: |
-  #         go test -bench=. -benchmem -count=5 ./... | tee benchmark.txt
-
-  #     - name: Store benchmark result
-  #       uses: benchmark-action/github-action-benchmark@v1
-  #       with:
-  #         name: Go benchmark
-  #         tool: 'go'
-  #         output-file-path: benchmark.txt
-  #         github-token: ${{ secrets.GITHUB_TOKEN }}
-  #         auto-push: true
-  #         comment-on-alert: true
-  #         alert-threshold: '200%'
-  #         fail-on-alert: true
-
-  # build binary then docker
-  # this build only happens on push
+  # build binary and docker
   build:
     name: Build Application
     runs-on: ubuntu-latest
