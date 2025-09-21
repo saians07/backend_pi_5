@@ -17,6 +17,7 @@ env:
   APP_NAME: backend_pi_5
 
 jobs:
+  # CHECK CODE QUALITY AND SECURITY
   code-quality:
     name: Code Quality & Security
     runs-on: ubuntu-latest
@@ -58,6 +59,7 @@ jobs:
           go install golang.org/x/vuln/cmd/govulncheck@latest
           govulncheck ./...
 
+  # TESTING
   test:
     name: Run tests
     runs-on: ubuntu-latest
@@ -116,12 +118,5 @@ jobs:
       #   env:
       #     DATABASE_URL: postgres://testuser:testpassword@localhost:5432/backend_pi_5_test?sslmode=disable
 
-      - name: Run unit tests
-        run: |
-          go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
-        env:
-          DATABASE_URL: postgres://testuser:testpassword@localhost:5432/backend_pi_5_test?sslmode=disable
-          REDIS_URL: redis://localhost:6379
-          GO_VERSION: ${{ matrix.go-version }}
-          
+
   
