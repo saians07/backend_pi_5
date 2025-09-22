@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v2"
 )
 
@@ -44,6 +45,10 @@ func getConfigPath() string {
 }
 
 func Load() (*Config, error) {
+	err := godotenv.Load()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load environment: %w: ", err)
+	}
 	configPath := getConfigPath()
 
 	// #nosec G304
