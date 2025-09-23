@@ -85,6 +85,6 @@ func overrideWithEnv(cfg *Config) {
 	}
 
 	if val := os.Getenv("PI5_POSTGRES_DB_NAME"); val != "" {
-		cfg.Database.Password = val
+		cfg.Database.DBName = val
 	}
 }
