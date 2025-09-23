@@ -58,5 +58,15 @@ func main() {
 func setupRoutes(userHandler *handler.UserHandler) *mux.Router {
 	router := mux.NewRouter()
 
+	// API routes
+	api := router.PathPrefix("/api/v1").Subrouter()
+	api.HandleFunc("/users/{id:[0-9]+}", userHandler.GetUser).Methods("GET")
+
+	// Health Check
+	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"status": "ok"}`))
+	}).Methods("GET")
+
 	return router
 }
