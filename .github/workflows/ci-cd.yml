@@ -192,7 +192,7 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
-            type=sha,prefix={{branch}}-
+            type=sha,prefix={{branch}}
             type=raw,value=latest,enable={{is_default_branch}}
             type=raw,value=${{ steps.version.outputs.version }}
 
@@ -210,3 +210,8 @@ jobs:
             BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # deploy-production:
+  #   name: Deploy to Production
+  #   runs-on: ubuntu-latest
+  #   needs: build
