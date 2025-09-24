@@ -131,6 +131,9 @@ jobs:
     runs-on: ubuntu-latest
     # if: github.event_name == 'release' || github.event_name == 'push'
     needs: [code-quality, test]
+    permissions:
+      contents: read
+      packages: write
 
     outputs:
       image: ${{ steps.build.outputs.image }}
