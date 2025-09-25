@@ -239,7 +239,7 @@ jobs:
 
       - name: Tes ssh to the server
         run: |
-          ssh -i ${{ secrets.SSH_PRIVATE_KEY }} -o ProxyCommand="cloudflared access ssh --hostname ${{ secrets.SSH_PRODUCTION_URL }}" ${{ secrets.SSHPRODUCTION_USER }}@${{ secrets.SSH_PRODUCTION_URL }} "echo 'Hello from GitHub Actions!'"
+          ssh -i ${{ secrets.SSH_PRIVATE_KEY }} -o ProxyCommand="cloudflared access ssh --hostname ${{ secrets.SSH_PRODUCTION_URL }}" ${{ secrets.SSH_PRODUCTION_USER }}@${{ secrets.SSH_PRODUCTION_URL }} "echo 'Hello from GitHub Actions!'"
 
       # Blue-Green Deployment
       # - name: Deploy to Production
