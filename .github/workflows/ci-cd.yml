@@ -237,8 +237,12 @@ jobs:
         uses: AnimMouse/setup-cloudflared@v2
 
       - name: Tes ssh to the server
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_PRODUCTION_URL }}
+          SSH_USER: ${{ secrets.SSH_PRODUCTION_USER }}
         run: |
-          ssh -i ${{ secrets.SSH_PRIVATE_KEY }} -o ProxyCommand="cloudflared access ssh --hostname ${{ secrets.SSH_PRODUCTION_URL }}" ${{ secrets.SSH_PRODUCTION_USER }}@${{ secrets.SSH_PRODUCTION_URL }} "echo 'Hello from GitHub Actions!'"
+          ssh -i "$SSH_KEY" -o ProxyCommand="cloudflared access ssh --hostname $SSH_HOST" $SSH_USER@$SSH_HOST "echo 'Hello from GitHub Actions!'"
 
       # Blue-Green Deployment
       # - name: Deploy to Production
