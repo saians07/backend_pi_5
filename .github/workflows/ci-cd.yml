@@ -222,19 +222,24 @@ jobs:
     # if: github.ref == 'refs/heads/master'
     environment:
       name: production
-      url: http://triple-s.web.id
+      url: ${{ secrets.PRODUCTION_URL }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      # - name: 
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: binaries
           path: ./bin
+      
+      - name: Install cloudflare
+        uses: AnimMouse/setup-cloudflared@v2
+
+      - name: Tes ssh to the server
+        run: |
+          ssh -i ${{ secrets.SSH_PRIVATE_KEY }} -o ProxyCommand="cloudflared access ssh --hostname ${{ secrets.SSH_PRODUCTION_URL }}" ${{ secrets.SSHPRODUCTION_USER }}@${{ secrets.SSH_PRODUCTION_URL }} "echo 'Hello from GitHub Actions!'"
 
       # Blue-Green Deployment
       # - name: Deploy to Production
