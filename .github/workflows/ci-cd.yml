@@ -243,13 +243,11 @@ jobs:
         run: |
           mkdir -p ~/.ssh
 
-          # debug the key
-          cat $SSH_KEY
           echo "$SSH_KEY" >> ~/.ssh/github_actions
           chmod 600 ~/.ssh/github_actions
 
           # Tambahkan host ke known_hosts (bypass host verification)
-          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || echo "ssh-keyscan failed, will skip host verification"
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: Tes ssh to the server
         env:
