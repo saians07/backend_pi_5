@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v2"
 )
 
@@ -44,6 +45,10 @@ func getConfigPath() string {
 }
 
 func Load() (*Config, error) {
+	err := godotenv.Load()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load environment: %w: ", err)
+	}
 	configPath := getConfigPath()
 
 	// #nosec G304
@@ -80,6 +85,6 @@ func overrideWithEnv(cfg *Config) {
 	}
 
 	if val := os.Getenv("PI5_POSTGRES_DB_NAME"); val != "" {
-		cfg.Database.Password = val
+		cfg.Database.DBName = val
 	}
 }
