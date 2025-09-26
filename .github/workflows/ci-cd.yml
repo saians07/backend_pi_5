@@ -22,10 +22,11 @@ env:
 
 jobs:
   # CHECK CODE QUALITY AND SECURITY
-  # Executed on all situations
+  # Executed only on pull request
   code-quality:
     name: Code Quality & Security
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
 
     steps:
       - name: Checout code
@@ -65,11 +66,12 @@ jobs:
           govulncheck ./...
 
   # TESTING
-  # Executed on all situations
+  # Executed only on pull request
   test:
     name: Run tests
     runs-on: ubuntu-latest
     needs: code-quality
+    if: github.event_name == 'pull_request'
 
     strategy:
       matrix:
@@ -124,12 +126,10 @@ jobs:
       #   env:
       #     DATABASE_URL: postgres://testuser:testpassword@localhost:5432/backend_pi_5_test?sslmode=disable
 
-  # # build binary and docker
-  # # Build binary only get executed when we are releasing a tag or releasing a new version or doing push to branch master
+  # build must always be DONE ON EVERY STEP!
   build:
     name: Build Application
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' || github.event_name == 'push'
     permissions:
       contents: read
       packages: write
@@ -214,6 +214,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  # deployment is only possible to be done when we are releasing something
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
@@ -259,5 +260,5 @@ jobs:
           ssh -v -i ~/.ssh/github_actions \
           -o StrictHostKeyChecking=no \
           -o UserKnownHostsFile=/dev/null \
-          pi-ssh "~/backend_pi_5/build.sh"
+          pi-ssh "docker pull ${{ needs.build.outputs.image }} && ~/backend_pi_5/build.sh"
 
