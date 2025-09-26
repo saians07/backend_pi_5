@@ -260,7 +260,5 @@ jobs:
           ssh -v -i ~/.ssh/github_actions \
           -o StrictHostKeyChecking=no \
           -o UserKnownHostsFile=/dev/null \
-          pi-ssh "echo 'Hello from GitHub Actions!' && echo 'Hellow hellow'"
+          pi-ssh "~/backend_pi_5/build.sh"
 
-      # Blue-Green Deployment
-      # - name: Deploy to Production
