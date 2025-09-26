@@ -246,20 +246,18 @@ jobs:
           echo "$SSH_KEY" > ~/.ssh/github_actions
           chmod 600 ~/.ssh/github_actions
 
-          # Tambahkan host ke known_hosts (bypass host verification)
-          # ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || echo "ssh-keyscan failed, will skip host verification"
+          echo "Host pi-ssh" > ~/.ssh/config
+          echo "  HostName $SSH_HOST" >> ~/.ssh/config
+          echo "  ProxyCommand cloudflared access ssh --hostname %h" >> ~/.ssh/config
+          echo "  User ${{ secrets.SSH_PRODUCTION_USER }}" >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
 
       - name: Tes ssh to the server
         env:
           SSH_HOST: ${{ secrets.SSH_PRODUCTION_URL }}
           SSH_USER: ${{ secrets.SSH_PRODUCTION_USER }}
         run: |
-          ssh -i ~/.ssh/github_actions \
-              -o StrictHostKeyChecking=no \
-              -o UserKnownHostsFile=/dev/null \
-              -o ProxyCommand="cloudflared access ssh --hostname $SSH_HOST" \
-              "$SSH_USER@$SSH_HOST" "echo 'Hello from GitHub Actions!' &&" \
-              "echo 'Hellow hellow'"
+          ssh -i ~/.ssh/github_actions pi-ssh "echo 'Hello from GitHub Actions!' && echo 'Hellow hellow'"
 
       # Blue-Green Deployment
       # - name: Deploy to Production
