@@ -258,7 +258,8 @@ jobs:
               -o StrictHostKeyChecking=no \
               -o UserKnownHostsFile=/dev/null \
               -o ProxyCommand="cloudflared access ssh --hostname $SSH_HOST" \
-              "$SSH_USER@$SSH_HOST" "echo 'Hello from GitHub Actions!'"
+              "$SSH_USER@$SSH_HOST" "echo 'Hello from GitHub Actions!' &&" \
+              "echo 'Hellow hellow'"
 
       # Blue-Green Deployment
       # - name: Deploy to Production
