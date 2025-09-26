@@ -239,7 +239,7 @@ jobs:
       - name: Setup ssh
         env:
           SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_HOST: ${{ secrets.SSH_PRODUCTION_URL }}
+          SSH_HOST: ${{ vars.SSH_PRODUCTION_URL }}
         run: |
           mkdir -p ~/.ssh
 
@@ -257,7 +257,7 @@ jobs:
           SSH_HOST: ${{ secrets.SSH_PRODUCTION_URL }}
           SSH_USER: ${{ secrets.SSH_PRODUCTION_USER }}
         run: |
-          ssh -i ~/.ssh/github_actions pi-ssh "echo 'Hello from GitHub Actions!' && echo 'Hellow hellow'"
+          ssh -v -i ~/.ssh/github_actions pi-ssh "echo 'Hello from GitHub Actions!' && echo 'Hellow hellow'"
 
       # Blue-Green Deployment
       # - name: Deploy to Production
