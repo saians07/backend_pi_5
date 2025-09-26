@@ -238,11 +238,13 @@ jobs:
 
       - name: Setup ssh
         env:
-          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_HOST: ${{ secrets.SSH_PRODUCTION_URL }}
+          SSH_KEY: ${{ vars.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ vars.SSH_PRODUCTION_URL }}
         run: |
           mkdir -p ~/.ssh
 
+          # debug the key
+          cat $SSH_KEY
           echo "$SSH_KEY" >> ~/.ssh/github_actions
           chmod 600 ~/.ssh/github_actions
 
@@ -251,8 +253,8 @@ jobs:
 
       - name: Tes ssh to the server
         env:
-          SSH_HOST: ${{ secrets.SSH_PRODUCTION_URL }}
-          SSH_USER: ${{ secrets.SSH_PRODUCTION_USER }}
+          SSH_HOST: ${{ vars.SSH_PRODUCTION_URL }}
+          SSH_USER: ${{ vars.SSH_PRODUCTION_USER }}
         run: |
           ssh -i ~/.ssh/github_actions -o ProxyCommand="cloudflared access ssh --hostname $SSH_HOST" $SSH_USER@$SSH_HOST "echo 'Hello from GitHub Actions!'"
 
