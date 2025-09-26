@@ -196,7 +196,7 @@ jobs:
             type=ref,event=branch
             type=ref,event=pr
             type=sha,prefix={{branch}}
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=${{ steps.version.outputs.version }}
 
       - name: Build and Push Docker Image
@@ -257,7 +257,10 @@ jobs:
           SSH_HOST: ${{ secrets.SSH_PRODUCTION_URL }}
           SSH_USER: ${{ secrets.SSH_PRODUCTION_USER }}
         run: |
-          ssh -v -i ~/.ssh/github_actions pi-ssh "echo 'Hello from GitHub Actions!' && echo 'Hellow hellow'"
+          ssh -v -i ~/.ssh/github_actions \
+          -o StrictHostKeyChecking=no \
+          -o UserKnownHostsFile=/dev/null \
+          pi-ssh "echo 'Hello from GitHub Actions!' && echo 'Hellow hellow'"
 
       # Blue-Green Deployment
       # - name: Deploy to Production
