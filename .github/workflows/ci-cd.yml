@@ -254,8 +254,8 @@ jobs:
           SSH_HOST: ${{ secrets.SSH_PRODUCTION_URL }}
           SSH_USER: ${{ secrets.SSH_PRODUCTION_USER }}
         run: |
-          echo ~/.ssh/github_actions
-          echo "$SSH_HOST"
+          cat ~/.ssh/github_actions
+          cat "$SSH_HOST"
           ssh -i ~/.ssh/github_actions -o ProxyCommand="cloudflared access ssh --hostname $SSH_HOST" $SSH_USER@$SSH_HOST "echo 'Hello from GitHub Actions!'"
 
       # Blue-Green Deployment
