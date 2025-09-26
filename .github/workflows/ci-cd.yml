@@ -247,7 +247,7 @@ jobs:
           chmod 600 ~/.ssh/github_actions
 
           # Tambahkan host ke known_hosts (bypass host verification)
-          ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || echo "ssh-keyscan failed, will skip host verification"
 
       - name: Tes ssh to the server
         env:
