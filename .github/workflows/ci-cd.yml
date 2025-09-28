@@ -236,7 +236,7 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: build
-    # if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master'
     environment:
       name: production
 
@@ -269,7 +269,7 @@ jobs:
           echo "  User ${{ secrets.SSH_PRODUCTION_USER }}" >> ~/.ssh/config
           chmod 600 ~/.ssh/config
 
-      - name: Tes ssh to the server
+      - name: SSH to server
         env:
           SSH_HOST: ${{ secrets.SSH_PRODUCTION_URL }}
           SSH_USER: ${{ secrets.SSH_PRODUCTION_USER }}
@@ -277,5 +277,5 @@ jobs:
           ssh -v -i ~/.ssh/github_actions \
           -o StrictHostKeyChecking=no \
           -o UserKnownHostsFile=/dev/null \
-          pi-ssh "cd ~/backend_pi_5 && git pull"
+          pi-ssh "cd ~/backend_pi_5 && git pull && chmod +x deploy.sh && ./deploy.sh"
 
