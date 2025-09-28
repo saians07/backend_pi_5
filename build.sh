@@ -5,6 +5,7 @@ echo "Utilize blue green deployment ..."
 # ensure we are on the correct directory
 cd ~/bakcend_pi_5
 cp ~/very_private_repo/.env .env
+docker pull ghcr.io/saians07/backend_pi_5:latest
 
 # Determine current and next environment
 if docker ps --format "table {{.Names}}" | grep -q "backend_pi_5_blue"; then
