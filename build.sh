@@ -13,16 +13,16 @@ if docker ps --format "table {{.Names}}" | grep -q "backend_pi_5_blue"; then
     CURRENT_PORT=8082
     NEXT_PORT=8083
     echo "Deploying to: $NEXT environment (port: $NEXT)"
-    docker compose down -f docker_compose_$NEXT.yml
-    docker compose up -f docker_compose_$NEXT.yml
+    docker compose --file docker_compose_$NEXT.yml down
+    docker compose --file docker_compose_$NEXT.yml up
 else
     CURRENT="green"
     NEXT="blue"
     CURRENT_PORT=8083
     NEXT_PORT=8082
     echo "Deploying to: $CURRENT environment (port: $CURRENT_PORT)"
-    docker compose down -f docker_compose_$NEXT.yml
-    docker compose up -f docker_compose_$NEXT.yml
+    docker compose -f docker_compose_$NEXT.yml down
+    docker compose -f docker_compose_$NEXT.yml up
 fi
 
 # wait for container to start
@@ -33,12 +33,12 @@ if curl -f httpl://localhost:$NEXT_PORT/health; then
     echo "✅ Health chek Passed"
 
     # if health check passed, we will stop old docker
-    docker compose down -f docker_compose_$CURRENT.yml
+    docker compose --file docker_compose_$CURRENT.yml down
 
     echo "✅ Deployment successful to $NEXT environment"
 else
     echo "❌ Health check failed on $NEXT environment"
-    docker docker compose down -f docker_compose_$NEXT.yml
+    docker docker compose --file docker_compose_$NEXT.yml down
     exit 1
 fi
 
