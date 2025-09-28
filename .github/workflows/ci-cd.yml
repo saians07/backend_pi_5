@@ -277,5 +277,5 @@ jobs:
           ssh -v -i ~/.ssh/github_actions \
           -o StrictHostKeyChecking=no \
           -o UserKnownHostsFile=/dev/null \
-          pi-ssh "cd ~/backend_pi_5 && git pull && docker pull ghcr.io/saians07/backend_pi_5:latest && ~/backend_pi_5/build.sh"
+          pi-ssh "cd ~/backend_pi_5 && git pull && docker pull ghcr.io/saians07/backend_pi_5:latest"
 
