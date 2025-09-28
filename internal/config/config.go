@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -53,7 +54,7 @@ func Load() (*Config, error) {
 
 	// #nosec G304
 	data, err := os.ReadFile(configPath)
-	if err != nil {
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return nil, fmt.Errorf("failed to read config file: %w", err)
 	}
 
