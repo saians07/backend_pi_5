@@ -9,6 +9,8 @@ services:
       - 8083:8080
     environment:
       - PORT=8080
+    env_file:
+      - ./.env
 
 networks:
   unified_network:
