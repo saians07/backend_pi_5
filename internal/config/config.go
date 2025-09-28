@@ -47,14 +47,14 @@ func getConfigPath() string {
 
 func Load() (*Config, error) {
 	err := godotenv.Load()
-	if err != nil {
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return nil, fmt.Errorf("failed to load environment: %w: ", err)
 	}
 	configPath := getConfigPath()
 
 	// #nosec G304
 	data, err := os.ReadFile(configPath)
-	if err != nil && !errors.Is(err, os.ErrNotExist) {
+	if err != nil {
 		return nil, fmt.Errorf("failed to read config file: %w", err)
 	}
 
