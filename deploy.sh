@@ -29,16 +29,19 @@ docker compose --file docker_compose_$NEXT.yml up -d
 sleep 10
 
 # Health Check
-if curl -f http://localhost:$NEXT_PORT/health; then
-    echo "✅ Health chek Passed"
+if curl -f -s --max-time 30 http://localhost:$NEXT_PORT/health; then
+    echo "✅ Health check Passed"
 
     # if health check passed, we will stop old docker
-    docker compose --file docker_compose_$CURRENT.yml down
+    if docker ps --format "table {{.Names}}" | grep -q "backend_pi_5_$CURRENT"; then
+        echo "Removing $CURRENT environment"
+        docker compose --file docker_compose_$CURRENT.yml down
+    fi
 
     echo "✅ Deployment successful to $NEXT environment"
 else
     echo "❌ Health check failed on $NEXT environment"
-    docker docker compose --file docker_compose_$NEXT.yml down
+    docker compose --file docker_compose_$NEXT.yml down
     exit 1
 fi
 
