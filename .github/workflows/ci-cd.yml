@@ -168,6 +168,13 @@ jobs:
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Building version: $VERSION"
+
+      - name: Build binary
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+            -ldflags="-X main.Version=${{ steps.version.outputs.version }} -X main.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ) -s -w" \
+            -o bin/backend_pi_5 \
+            ./cmd/api
       
       - name: Build ARM64 binary (for Raspberry Pi)
         run: |
@@ -181,6 +188,7 @@ jobs:
         with:
           name: binaries
           path: |
+            bin/backend_pi_5
             bin/backend_pi_5-arm64
           retention-days: 30
 
@@ -213,7 +221,7 @@ jobs:
         with:
           context: .
           file: ./scripts/Dockerfile
-          platforms: linux/arm64
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -228,7 +236,7 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/master'
+    # if: github.ref == 'refs/heads/master'
     environment:
       name: production
 
@@ -248,7 +256,7 @@ jobs:
       - name: Setup ssh
         env:
           SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_HOST: ${{ vars.SSH_PRODUCTION_URL }}
+          SSH_HOST: ${{ secrets.SSH_PRODUCTION_URL }}
         run: |
           mkdir -p ~/.ssh
 
@@ -269,5 +277,5 @@ jobs:
           ssh -v -i ~/.ssh/github_actions \
           -o StrictHostKeyChecking=no \
           -o UserKnownHostsFile=/dev/null \
-          pi-ssh "git pull && docker pull ghcr.io/saians07/backend_pi_5:latest && ~/backend_pi_5/build.sh"
+          pi-ssh "cd ~/backend_pi_5 && git pull && docker pull ghcr.io/saians07/backend_pi_5:latest"
 

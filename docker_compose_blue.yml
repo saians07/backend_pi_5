@@ -4,11 +4,13 @@ services:
     networks:
       - unified_network
     restart: unless-stopped
-    image: ghcr.io/saians07/backend_pi5:latest
+    image: ghcr.io/saians07/backend_pi_5:latest
     ports:
       - 8082:8080
     environment:
       - PORT=8080
+    env_file:
+      - ./.env
 
 networks:
   unified_network:
