@@ -22,10 +22,11 @@ env:
 
 jobs:
   # CHECK CODE QUALITY AND SECURITY
-  # Executed on all situations
+  # Executed only on pull request
   code-quality:
     name: Code Quality & Security
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
 
     steps:
       - name: Checout code
@@ -65,11 +66,12 @@ jobs:
           govulncheck ./...
 
   # TESTING
-  # Executed on all situations
+  # Executed only on pull request
   test:
     name: Run tests
     runs-on: ubuntu-latest
     needs: code-quality
+    if: github.event_name == 'pull_request'
 
     strategy:
       matrix:
@@ -124,12 +126,10 @@ jobs:
       #   env:
       #     DATABASE_URL: postgres://testuser:testpassword@localhost:5432/backend_pi_5_test?sslmode=disable
 
-  # # build binary and docker
-  # # Build binary only get executed when we are releasing a tag or releasing a new version or doing push to branch master
+  # build must always be DONE ON EVERY STEP!
   build:
     name: Build Application
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' || github.event_name == 'push'
     permissions:
       contents: read
       packages: write
@@ -148,6 +148,15 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
+      
+      - name: Create .env for build
+        run: |
+          echo ${{ secrets.PI5_POSTGRES_DB_NAME }} > .env
+          echo ${{ secrets.PI5_POSTGRES_DB_USER }} >> .env
+          echo ${{ secrets.PI5_POSTGRES_DB_PWD }} >> .env
+          echo ${{ secrets.PI5_POSTGRES_DB_PORT }} >> .env
+          echo ${{ secrets.PI5_POSTGRES_DB_HOST }} >> .env
+          echo ${{ secrets.PI5_GO_BACKEND_ENV }} >> .env
 
       - name: Generate version
         id: version
@@ -195,7 +204,7 @@ jobs:
             type=ref,event=branch
             type=ref,event=pr
             type=sha,prefix={{branch}}
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
             type=raw,value=${{ steps.version.outputs.version }}
 
       - name: Build and Push Docker Image
@@ -214,11 +223,12 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  # deployment is only possible to be done when we are releasing something
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name == 'release'
+    if: github.ref == 'refs/heads/master'
     environment:
       name: production
 
@@ -259,5 +269,5 @@ jobs:
           ssh -v -i ~/.ssh/github_actions \
           -o StrictHostKeyChecking=no \
           -o UserKnownHostsFile=/dev/null \
-          pi-ssh "~/backend_pi_5/build.sh"
+          pi-ssh "git pull && docker pull ghcr.io/saians07/backend_pi_5:latest && ~/backend_pi_5/build.sh"
 
