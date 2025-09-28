@@ -29,7 +29,7 @@ fi
 sleep 10
 
 # Health Check
-if curl -f httpl://localhost:$NEXT_PORT/health; then
+if curl -f http://localhost:$NEXT_PORT/health; then
     echo "✅ Health chek Passed"
 
     # if health check passed, we will stop old docker
