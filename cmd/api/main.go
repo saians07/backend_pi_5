@@ -13,6 +13,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type AllHandlers struct {
+	UserHandler *handler.UserHandler
+}
+
 func main() {
 	// initialize logger
 	log := logger.InitLog()
@@ -38,8 +42,12 @@ func main() {
 	// initialize handler
 	userHandler := handler.InitUserHandler(userService, log)
 
+	handlers := &AllHandlers{
+		UserHandler: userHandler,
+	}
+
 	// setup routes
-	router := setupRoutes(userHandler)
+	router := setupRoutes(handlers)
 
 	// start server
 	log.Info("Server starting on port " + cfg.Server.Port)
@@ -55,12 +63,12 @@ func main() {
 	}
 }
 
-func setupRoutes(userHandler *handler.UserHandler) *mux.Router {
+func setupRoutes(h *AllHandlers) *mux.Router {
 	router := mux.NewRouter()
 
 	// API routes
 	api := router.PathPrefix("/api/v1").Subrouter()
-	api.HandleFunc("/users/{id:[0-9]+}", userHandler.GetUser).Methods("GET")
+	api.HandleFunc("/users/{id:[0-9]+}", h.UserHandler.GetUser).Methods("GET")
 
 	// Health Check
 	// #nosec G104
