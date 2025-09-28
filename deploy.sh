@@ -13,18 +13,17 @@ if docker ps --format "table {{.Names}}" | grep -q "backend_pi_5_blue"; then
     NEXT="green"
     CURRENT_PORT=8082
     NEXT_PORT=8083
-    echo "Deploying to: $NEXT environment (port: $NEXT)"
-    docker compose --file docker_compose_$NEXT.yml down
-    docker compose --file docker_compose_$NEXT.yml up -d
 else
     CURRENT="green"
     NEXT="blue"
     CURRENT_PORT=8083
     NEXT_PORT=8082
-    echo "Deploying to: $CURRENT environment (port: $CURRENT_PORT)"
-    docker compose -f docker_compose_$NEXT.yml down
-    docker compose -f docker_compose_$NEXT.yml up -d
 fi
+
+
+echo "Deploying to: $NEXT environment (port: $NEXT)"
+docker compose --file docker_compose_$NEXT.yml down
+docker compose --file docker_compose_$NEXT.yml up -d
 
 # wait for container to start
 sleep 10
