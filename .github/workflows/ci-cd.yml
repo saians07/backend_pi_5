@@ -285,6 +285,10 @@ jobs:
     needs: deploy-production
     # if: github.ref == 'refs/heads/master'
 
+    permissions:
+      contents: write
+      actions: read
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
