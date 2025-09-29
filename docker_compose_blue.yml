@@ -1,6 +1,6 @@
 services:
   backend_pi_5:
-    container_name: backend_pi5_blue
+    container_name: backend_pi_5_blue
     networks:
       - unified_network
     restart: unless-stopped
