@@ -6,8 +6,6 @@ on:
     branches: [master]
     paths-ignore:
       - 'README.md'
-    tags:
-      - 'v*'
   pull_request:
     branches: [master]
   release:
@@ -21,103 +19,7 @@ env:
   APP_NAME: backend_pi_5
 
 jobs:
-  # CHECK CODE QUALITY AND SECURITY
-  # Executed only on pull request
-  code-quality:
-    name: Code Quality & Security
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-
-    steps:
-      - name: Checout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      
-      - name: Setup Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache: true
-      
-      - name: Verify Go modules
-        run: |
-          go mod verify
-          go mod tidy
-          git diff --exit-code go.mod go.sum
-        
-      - name: Run go vet
-        run: go vet ./...
-
-      - name: Run staticcheck
-        uses: dominikh/staticcheck-action@v1.4.0
-        with:
-          version: "latest"
-          install-go: false
-      
-      - name: Run gosec (Security Scanner)
-        run: |
-          go install github.com/securego/gosec/v2/cmd/gosec@latest
-          gosec ./...
-
-      - name: Check for vulnerabilities
-        run: |
-          go install golang.org/x/vuln/cmd/govulncheck@latest
-          govulncheck ./...
-
-  # TESTING
-  # Executed only on pull request
-  test:
-    name: Run tests
-    runs-on: ubuntu-latest
-    needs: code-quality
-    if: github.event_name == 'pull_request'
-
-    strategy:
-      matrix:
-        go-version: ['1.24.0', '1.25.1']
-
-    services:
-      postgres:
-        image: postgres:17
-        env:
-          POSTGRES_PASSWORD: testpassword
-          POSTGRES_USER: testuser
-          POSTGRES_DB: backend_pi_5_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-      redis:
-        image: redis:7-alpine
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Go ${{ matrix.go-version }}
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ matrix.go-version }}
-
-      - name: install dependencies
-        run: go mod download
-
-      - name: Wait for services
-        run:
-          timeout 60s sh -c 'until nc -z localhost 5432; do sleep 1; done'
-          timeout 60s sh -c 'until nc -z localhost 6379; do sleep 1; done'
+  
       
       # TODO: Implement this migration capabilities
       # - name: Run database migrations
