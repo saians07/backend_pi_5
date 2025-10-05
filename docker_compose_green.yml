@@ -1,6 +1,6 @@
 services:
-  triple-s-green:
-    container_name: triple-s-green
+  backend_pi_5:
+    container_name: backend_pi_5_green
     networks:
       - unified_network
     restart: unless-stopped
