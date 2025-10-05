@@ -1,0 +1,21 @@
+services:
+  triple-s-green:
+    container_name: triple-s-green
+    networks:
+      - unified_network
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: scripts/Dockerfile
+    ports:
+      - 8080:8080
+    env_file:
+      - ./.env
+    environment:
+      - PORT=8080
+      - APP_ENV=production
+    command: ["gunicorn", "-t", "10", "-w", "2", "-b", "0.0.0.0:8080", "--log-level", "debug", "main:app"]
+
+networks:
+  unified_network:
+    external: true
