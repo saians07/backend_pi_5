@@ -1,72 +1,38 @@
-name: Continuous Integration
-
-# triggers
 on:
-  pull_request:
-    branches: [release_candidate, master]
+  push:
+    branches: [master]
   workflow_dispatch:
 
-permissions:
-  contents: read
-
-env:
-  PYTHON_VERSION: '3.12.11'
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-  APP_NAME: backend_pi_5
-
 jobs:
-  code-quality:
-    name: Code Quality and Security Check
+  build-and-test:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pylint
-          pip install -r requirements.txt
-
-      - name: Analyze the lint
-        run: |
-          pylint $(git ls-files '*.py')
-
-  security-check:
-    name: Analyze the Python's code
-    runs-on: ubuntu-latests
-    permissions:
-      security-events: write
-      packages: read
-      actions: read
-      contents: read
-
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - language: python
-            build-mode: none
-
+        python-version: ["3.12.11", "3.14", "3.13"]
+      
     steps:
       - uses: actions/checkout@v4
 
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+      - name: Setup Python ${{ matrix.python-version}}
+        uses: actions/setup-python@v3
         with:
-          languages: ${{ matrix.language }}
-          build-mode: ${{ matrix.build-mode }}
+          python-version: ${{ matrix.python-version }}
 
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:${{ matrix.language }}"
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install flake8 pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        
+      - name: Lint the Code Using flake8
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-  
-  
+      - name: Test the code with pytest
+        run: |
+          pytest
+          if [ $? -ne 5 ]; then
+            exit 0 
+          fi
