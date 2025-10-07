@@ -1,0 +1,40 @@
+name: Continuous Integration
+
+# triggers
+on:
+  pull_request:
+    branches: [release_candidate, master]
+  worflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: '3.12.11'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  APP_NAME: backend_pi_5
+
+jobs:
+  code-quality:
+    name: Code Quality and Security Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint
+
+      - name: Analyze the lin
+        run: |
+          pylint $(git ls-files '*.py')
+  
+  
