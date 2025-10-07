@@ -40,7 +40,8 @@ jobs:
 
   security-check:
     name: Analyze the Python's code
-    runs-on: ubuntu-latests
+    runs-on: ubuntu-latest
+    needs: code-quality
     permissions:
       security-events: write
       packages: read
