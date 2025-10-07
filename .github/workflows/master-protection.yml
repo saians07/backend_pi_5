@@ -1,0 +1,25 @@
+name: Master Protection to Ensure Only Accepts Release Candidate
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  check_source_branch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get source branch name
+        id: branch_name
+        run: echo "SOURCE_BRANCH=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+
+      - name: Check if source branch is 'release_candidate'
+        if: ${{ steps.branch_name.outputs.SOURCE_BRANCH != 'release_candidate' }}
+        run: |
+          echo "error: ❌ Pull Request ke master hanya boleh dari branch release_candidate"
+          exit 1
+
+      - name: Success message for release_candidate
+        if: ${{ steps.branch_name.outputs.SOURCE_BRANCH == 'release_candidate' }}
+        run: |
+          echo "✅ SUCCESS: Pull Request diizinkan!"
