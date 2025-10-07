@@ -1,4 +1,5 @@
-from flask import Flask, jsonify, request
+# pylint: disable=C0114
+from flask import Flask, jsonify, request # pylint: disable=C0114
 
 app = Flask(__name__)
 
