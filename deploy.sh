@@ -41,7 +41,7 @@ if curl -f -s --max-time 30 http://localhost:$NEXT_PORT/health; then
 
     # get the token from nginx json response
     TOKEN=$(curl -X POST "http://nginx.$BACKEND_URL/api/users/login" -H "Content-Type: application/json" -d "{\"username\":\"$NGINX_IGNITION_USER\",\"password\":\"$NGINX_IGNITION_PWD\"}" | jq -r '.token')
-    
+
     RAW_DATA="{\"enabled\":true,\"defaultServer\":false,\
         \"useGlobalBindings\":false,\"domainNames\":[\"api.$BACKEND_URL\"],\
         \"routes\":[{\"priority\":0,\"enabled\":true,\"type\":\"PROXY\",\"sourcePath\":\"/\",\"settings\":{\"includeForwardHeaders\":true,\"proxySslServerName\":true,\"keepOriginalDomainName\":true,\"directoryListingEnabled\":false,\"custom\":null},\"targetUri\":\"http://192.168.1.10:$NEXT_PORT\",\"redirectCode\":null,\"response\":null,\"integration\":null,\"accessListId\":null,\"sourceCode\":null}],\
