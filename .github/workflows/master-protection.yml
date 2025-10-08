@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Get source branch name
+      - name: Source Master From RC
         id: branch_name
         run: echo "SOURCE_BRANCH=${{ github.head_ref }}" >> $GITHUB_OUTPUT
 
@@ -23,3 +23,4 @@ jobs:
         if: ${{ steps.branch_name.outputs.SOURCE_BRANCH == 'release_candidate' }}
         run: |
           echo "✅ SUCCESS: Pull Request diizinkan!"
+
