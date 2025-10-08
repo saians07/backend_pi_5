@@ -84,11 +84,12 @@ jobs:
             type=ref,event=pr
             type=sha,prefix={{branch}}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
-            type=raw,value=${{ steps.version.outputs.version }
+            type=raw,value=${{ steps.version.outputs.version }}
       
       - name: Build and Push Docker Image
         id: build
         if: github.ref == 'refs/heads/master'
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./scripts/Dockerfile
@@ -97,7 +98,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args:
-            VERSION=${{ steps.version.output.version }}
-            BUILD_TIME=${{date -u +%Y-%m-%d%T%H:%M:%SZ}}
+            VERSION=${{ steps.version.outputs.version }}
+            BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           cache-from: type=gha
           cache-to: type=gha,mode=max
