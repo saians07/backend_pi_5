@@ -1,12 +1,10 @@
 services:
-  backend_pi_5:
+  backend_pi_5_blue:
     container_name: backend_pi_5_blue
     networks:
       - unified_network
     restart: unless-stopped
-    build:
-      context: .
-      dockerfile: scripts/Dockerfile
+    image: ghcr.io/saians07/backend_pi_5:latest
     ports:
       - 8082:8080
     env_file:

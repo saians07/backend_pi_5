@@ -38,7 +38,7 @@ if curl -f -s --max-time 30 http://localhost:$NEXT_PORT/health; then
     apt install jq
 
     # get the token from nginx json response
-    TOKEN=$(curl -X POST http://nginx.$BACKEND_URL/api/users/login -H "Content-Type: application/json" -d "{\"username\":\"$NGINX_IGNITION_USER\",\"password\":\"$NGINX_IGNITION_PWD\"}" | jq -r '.token')
+    TOKEN=$(curl -X POST "http://nginx.$BACKEND_URL/api/users/login" -H "Content-Type: application/json" -d "{\"username\":\"$NGINX_IGNITION_USER\",\"password\":\"$NGINX_IGNITION_PWD\"}" | jq -r '.token')
 
     RAW_DATA="{\"enabled\":true,\"defaultServer\":false,\
         \"useGlobalBindings\":false,\"domainNames\":[\"api.$BACKEND_URL\"],\
