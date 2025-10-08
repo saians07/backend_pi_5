@@ -40,7 +40,7 @@ jobs:
       - name: Test the code with pytest
         run: |
           pytest
-          if [ $? -ne 5 ]; then
+          if [ $? -eq 5 ]; then
             exit 0 
           fi
   build-and-publish:
