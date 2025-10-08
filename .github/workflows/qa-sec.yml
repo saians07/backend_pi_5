@@ -4,6 +4,8 @@ name: Code Quality and Security Check
 on:
   pull_request:
     branches: [release_candidate]
+  push:
+    branches: [release_candidate]
   workflow_dispatch:
 
 permissions:
