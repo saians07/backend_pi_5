@@ -1,9 +1,11 @@
 echo "Start deploying process ..."
 
-source .env
+cd ~/very_private_repo
+git pull
 
 cd ~/backend_pi_5
 cp ~/very_private_repo/.env .env
+source .env
 docker pull ghcr.io/saians07/backend_pi_5:latest
 
 echo "Start configuring environment ..."
@@ -39,7 +41,7 @@ if curl -f -s --max-time 30 http://localhost:$NEXT_PORT/health; then
 
     # get the token from nginx json response
     TOKEN=$(curl -X POST "http://nginx.$BACKEND_URL/api/users/login" -H "Content-Type: application/json" -d "{\"username\":\"$NGINX_IGNITION_USER\",\"password\":\"$NGINX_IGNITION_PWD\"}" | jq -r '.token')
-
+    
     RAW_DATA="{\"enabled\":true,\"defaultServer\":false,\
         \"useGlobalBindings\":false,\"domainNames\":[\"api.$BACKEND_URL\"],\
         \"routes\":[{\"priority\":0,\"enabled\":true,\"type\":\"PROXY\",\"sourcePath\":\"/\",\"settings\":{\"includeForwardHeaders\":true,\"proxySslServerName\":true,\"keepOriginalDomainName\":true,\"directoryListingEnabled\":false,\"custom\":null},\"targetUri\":\"http://192.168.1.10:$NEXT_PORT\",\"redirectCode\":null,\"response\":null,\"integration\":null,\"accessListId\":null,\"sourceCode\":null}],\
@@ -47,7 +49,7 @@ if curl -f -s --max-time 30 http://localhost:$NEXT_PORT/health; then
         \"featureSet\":{\"websocketsSupport\":true,\"http2Support\":true,\"redirectHttpToHttps\":false},\
         \"accessListId\":null}"
 
-    curl -X PUT http://nginx.$BACKEND_URL/api/hosts/ed2557da-24bf-4fa1-8f8a-4a0761a1d8b5 \
+    curl -X PUT "http://nginx.$BACKEND_URL/api/hosts/ed2557da-24bf-4fa1-8f8a-4a0761a1d8b5" \
         -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" \
         --data-raw "$RAW_DATA"
 
