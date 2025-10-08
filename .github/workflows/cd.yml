@@ -1,0 +1,126 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: Publish docker image
+    if: github.ref == 'refs/heads/master'
+    environment:
+      name: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Cloudflare
+        uses: Animouse/setup-cloudflare@v2
+
+      - name: Setup SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_PRODUCTION_URL }}
+        run: |
+          mkdir -p ~/.ssh
+
+          echo "$SSH_KEY" > ~/.ssh/github_actions
+          chmod 600 ~/.ssh/github_actions
+
+          echo "Host pi-ssh" > ~/.ssh/config
+          echo "  Hostname $SSH_HOST" >> ~/.ssh/config
+          echo "  ProxyCommand cloudflared access ssh --hostname %h" >> ~/.ssh/config
+          echo "  User ${{ secrets.SSH_PRODUCTION_USER }}" >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
+
+      - name: SSH to Server
+        env:
+          SSH_HOST: ${{ secrets.SSH_PRODUCTION_URL }}
+          SSH_USER: ${{ secrets.SSH_PRODUCTION_USER }}
+        run: |
+          ssh -v -i ~/.ssh/github_actions \
+          -o StrictHostKeyChecking=no \
+          -o UserKnownHostsFile=/dev/null \
+          pi-ssh "cd ~/backend_pi_5 && git pull && chmod +x deploy.sh && ./deploy.sh"
+  
+  create-release:
+    name: Create a Github Release
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: github.ref == 'refs/heads/master'
+
+    permissions:
+      contents: write
+      actions: read
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version from file
+        id: get_version
+        run: |
+          VERSION=$(cat version.txt)
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if tag already exists
+        id: check_tag
+        uses: mukunku/tag-exists-action@v1.6.0
+        with:
+          tag: "${{ steps.get_version.outputs.VERSION }}"
+
+      - name: Create new tag
+        if: steps.check_tag.outputs.exists == 'false'
+        id: create_tag
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = `${{ steps.get_version.outputs.VERSION }}`.trim();
+            
+            console.log(`Creating tag ${tag}`);
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/${tag}`,
+              sha: context.sha
+            });
+            console.log(`Tag ${tag} created successfully.`);
+            
+            core.setOutput('tag_name', tag);
+      
+      - name: Create GitHub release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          release_name: backend_pi_5 ${{ steps.get_version.outputs.VERSION }}
+          body: |
+            🚀 **Production Release - backend_pi_5**
+            
+            **Version:** ${{ steps.get_version.outputs.VERSION }}
+            **Build:** ${{ github.run_number }}
+            
+            **Changes:**
+            ${{ github.event.head_commit.message }}
+            
+            **Docker Image:** 
+            ```
+            ${{ needs.build.outputs.image }}
+            ```
+            
+            **Deployed by:** @${{ github.actor }}
+            **Commit:** ${{ github.sha }}
+            
+            ---
+            
+            🔗 **API Endpoint:** https://api.triple-s.web.id
+            🏥 **Health Check:** https://api.triple-s.web.id/health
+          draft: false
+          prerelease: false
+
+  
