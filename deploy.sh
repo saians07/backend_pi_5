@@ -29,13 +29,13 @@ echo "🩺 Start health checking ..."
 if curl -f -s --max-time 30 http://localhost:$NEXT_PORT/health; then
     echo "✅ Health check Passed"
 
-     if docker ps --format "table {{.Names}}" | grep -q "backend_pi_5_$CURRENT"; then
+    if docker ps --format "table {{.Names}}" | grep -q "backend_pi_5_$CURRENT"; then
         echo "Removing $CURRENT environment"
         docker compose --file docker_compose_$CURRENT.yml down
     fi
 
     # install jq to parse json
-    apt install jq
+    sudo apt install jq
 
     # get the token from nginx json response
     TOKEN=$(curl -X POST "http://nginx.$BACKEND_URL/api/users/login" -H "Content-Type: application/json" -d "{\"username\":\"$NGINX_IGNITION_USER\",\"password\":\"$NGINX_IGNITION_PWD\"}" | jq -r '.token')
