@@ -52,6 +52,15 @@ if curl -f -s --max-time 30 http://localhost:$NEXT_PORT/health; then
     curl -X PUT "http://nginx.$BACKEND_URL/api/hosts/ed2557da-24bf-4fa1-8f8a-4a0761a1d8b5" \
         -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" \
         --data-raw "$RAW_DATA"
+    
+    curl "https://nginx.$BACKEND_URL/api/nginx/reload" \
+        -X 'POST' \
+        -H 'accept: application/json' \
+        -H "authorization: Bearer $TOKEN" \
+        -H 'content-type: application/json' \
+        -H "origin: http://nginx.$BACKEND_URL" \
+        -H 'priority: u=1, i' \
+        -H "referer: http://nginx.$BACKEND_URL/api/hosts/ed2557da-24bf-4fa1-8f8a-4a0761a1d8b5" \
 
     echo "✅ Deployment successful to $NEXT environment"
 else
