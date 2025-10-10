@@ -1,4 +1,3 @@
-# pylint: disable=C0114
 from fastapi import FastAPI, HTTPException, status
 from api import telegram_router
 
@@ -10,7 +9,7 @@ def root():
     raise HTTPException(status_code=403, detail="Forbidden")
 
 @app.get("/health")
-def health(): # pylint: disable=C0116
+def health():
     """Check health for the page"""
     return {'status': "ok", 'status_code': status.HTTP_200_OK}
 
