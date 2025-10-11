@@ -49,7 +49,7 @@ jobs:
     name: Build and Publish Docker Image
     runs-on: ubuntu-latest
     needs: test
-    if: github.ref == 'refs/heads/master'
+    # if: github.ref == 'refs/heads/master'
 
     permissions:
       contents: read
@@ -97,7 +97,8 @@ jobs:
             type=ref,event=branch
             type=ref,event=pr
             type=sha,prefix={{branch}}
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
+            type=raw,value=stable,enable=${{ github.ref == 'refs/heads/master' }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/release_candidate' }}
             type=raw,value=${{ steps.version.outputs.version }}
       
       - name: Build and Push Docker Image
