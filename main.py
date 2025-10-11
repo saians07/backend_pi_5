@@ -1,14 +1,18 @@
 # pylint: disable=C0114
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status
+from api import telegram_router
 
 app = FastAPI(title="Backend Raspberry Pi")
 
-@app.get("/")
+@app.get("/", status_code=status.HTTP_403_FORBIDDEN)
 def root():
     """Visit root path"""
-    return {'status': "error"}
+    raise HTTPException(status_code=403, detail="Forbidden")
 
 @app.get("/health")
-def health(): # pylint: disable=C0116
+def health():
     """Check health for the page"""
-    return {'status': "ok", 'status_code': 200}
+    return {'status': "ok", 'status_code': status.HTTP_200_OK}
+
+# include telegram route
+app.include_router(telegram_router)
