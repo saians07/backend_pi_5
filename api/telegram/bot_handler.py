@@ -10,9 +10,9 @@ from api.ai import ask_gemini
 
 router = APIRouter(prefix="/telegram", tags=["telegram"])
 
-async def get_bot() -> TelegramBot:
+async def get_bot(request: Request) -> TelegramBot:
     """Get state of the bot from main app"""
-    return Request.app.state.bot
+    return request.app.state.bot
 
 @router.post("/webhook", status_code=status.HTTP_200_OK)
 async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(get_bot)):
