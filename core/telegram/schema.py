@@ -10,7 +10,7 @@ class BotChat(BaseModel):
     """Parsing key chat from message input"""
     id: int
     first_name: str
-    username: str
+    username: Optional[str] = None
     type: str
 
 class BotFromUserInfo(BaseModel):
@@ -18,8 +18,8 @@ class BotFromUserInfo(BaseModel):
     id: int
     is_bot: bool
     first_name: str
-    username: str
-    language_code: str
+    username: Optional[str] = None
+    language_code: Optional[str] = None
 
 class BotPhoto(BaseModel):
     """Parsing key photo from message input"""
