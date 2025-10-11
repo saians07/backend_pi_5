@@ -1,8 +1,8 @@
+# pylint disable: C0114
 import os
 from dotenv import load_dotenv
 import httpx
 from fastapi import HTTPException
-# from pydantic import BaseModel
 
 load_dotenv()
 
@@ -34,9 +34,9 @@ class TelegramBot:
             self._name = request.json().get("result").get("first_name")
             if not self._name:
                 raise ValueError("There is no bot name found!")
-            
+
             return
-                
+
         except HTTPException as e:
             raise e
 
@@ -86,11 +86,12 @@ class TelegramBot:
             img_path = location.get("result").get("file_path")
             img_response = await self.client.get(f"{BASE_FILE_URL}/{img_path}")
 
-            if img_response.status_code == 200:
-                img_data = img_response.content
-                return img_data
-            else:
+            if img_response.status_code != 200:
                 raise HTTPException(img_response.status_code)
+
+            img_data = img_response.content
+            return img_data
+
         elif location.json().get("error_code"):
             raise HTTPException(location.json().get("error_code"))
 

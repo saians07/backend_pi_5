@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, HTTPException, Depends # disable lint: C0114
+from fastapi import APIRouter, status, HTTPException, Depends # pylint disable: C0114
 import httpx
 from core.telegram import (
     BotWebhook,
@@ -50,7 +50,7 @@ async def set_telegram_webhook(dto: BotWebhook, bot: TelegramBot=Depends(create_
             'message': f"You have successfully attach {url} to the bot!",
             'status_code': status.HTTP_200_OK
         }
-            
+   
     except Exception as e:
         raise e
 
@@ -61,9 +61,9 @@ async def get_telegram_webhook(bot: TelegramBot=Depends(create_bot)):
         curr_webhook = await bot.get_current_webhook()
         if not curr_webhook.get("result").get("url"):
             raise HTTPException(404)
-        
+
         return curr_webhook
-            
+
     except Exception as e:
         raise e
 

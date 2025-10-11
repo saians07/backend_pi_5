@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status # pylint disable: C0114
 from api import telegram_router
 
 app = FastAPI(title="Backend Raspberry Pi")
