@@ -1,2 +1,2 @@
-from core.telegram.schema import WebhookURL, BotMessageInput
+from core.telegram.schema import BotWebhook, BotMessageInput
 from core.telegram.bot import TelegramBot

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
 
-class WebhookURL(BaseModel):
+class BotWebhook(BaseModel):
     """Parsing Raw Webhook URL From User"""
     url: str
 

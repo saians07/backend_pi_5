@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 import httpx
 from core.telegram import (
-    WebhookURL,
+    BotWebhook,
     BotMessageInput,
     TelegramBot
 )
@@ -20,7 +20,7 @@ def telegram_webhook(payload: BotMessageInput):
     return payload
 
 @router.post("/set_webhook", status_code=status.HTTP_200_OK)
-async def set_telegram_webhook(dto: WebhookURL, bot: TelegramBot=Depends(create_bot)):
+async def set_telegram_webhook(dto: BotWebhook, bot: TelegramBot=Depends(create_bot)):
     url = dto.url
     
     # always use try catch block
@@ -61,3 +61,5 @@ async def delete_telegram_webhook(bot: TelegramBot=Depends(create_bot)):
         return {'message': res.get("description"), 'status_code': status.HTTP_200_OK}
     except Exception as e:
         raise HTTPException(500, str(e))
+
+# TODO: add getFile and sendMessage function in core.
