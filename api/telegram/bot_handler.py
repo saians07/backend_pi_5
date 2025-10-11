@@ -20,7 +20,7 @@ async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(cr
     # photo = None
     LOG.info(f"receiving new payload \n {payload}")
     chat_id = payload.message.chat.id
-    
+
     if payload.message.entities:
         pass # come here if it is a command
 
@@ -42,7 +42,7 @@ async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(cr
             pass # here we will check if it has caption
         else:
             pass
-    
+
     if payload.message.document:
         if payload.message.caption:
             pass # here we will check if it has caption
