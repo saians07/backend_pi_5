@@ -1,30 +1,56 @@
 # pylint: disable=C0114
-from fastapi import APIRouter, status, HTTPException, Depends
-import httpx
+from fastapi import APIRouter, status, HTTPException, Depends, Request
 from core.telegram import (
     BotWebhook,
     BotMessageInput,
     TelegramBot
 )
 from core.logger import LOG
+from api.ai import ask_gemini
 
 router = APIRouter(prefix="/telegram", tags=["telegram"])
 
-def create_bot() -> TelegramBot:
-    """Return a single shared bot instance"""
-    client = httpx.AsyncClient()
-    bot = TelegramBot(client)
-    return bot
+async def create_bot() -> TelegramBot:
+    return Request.app.state.bot
 
 @router.post("/webhook", status_code=status.HTTP_200_OK)
 async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(create_bot)):
     """Endpoint where telegram will send the data to."""
+    message = None
+    # photo = None
     LOG.info(f"receiving new payload \n {payload}")
     chat_id = payload.message.chat.id
-    message = payload.message.text or payload.message.caption or \
-        "Tidak ada pesan string untuk ditampilkan"
+    
+    if payload.message.entities:
+        pass # come here if it is a command
 
-    msg = await bot.send_message_to_bot(chat_id, message)
+    if payload.message.text:
+        user_parts = {
+            "role": "user",
+            "content": payload.message.text
+        }
+        try:
+            resp = ask_gemini(user_parts)
+            msg = resp.choices[0].message.content
+
+            await bot.send_message_to_bot(chat_id, message=msg)
+        except Exception as e:
+            raise HTTPException(500, detail=str(e))
+
+    if payload.message.text:
+        if payload.message.caption:
+            pass # here we will check if it has caption
+        else:
+            pass
+    
+    if payload.message.document:
+        if payload.message.caption:
+            pass # here we will check if it has caption
+        else:
+            pass
+
+
+    msg = await bot.send_message_to_bot(chat_id, message=message)
     return msg
 
 @router.post("/set_webhook", status_code=status.HTTP_200_OK)
