@@ -2,13 +2,14 @@ import os
 from dotenv import load_dotenv
 import httpx
 from fastapi import HTTPException
-from pydantic import BaseModel
+# from pydantic import BaseModel
 
 load_dotenv()
 
 BOT_TOKEN = os.getenv("TBOTAPI")
 BACKEND_URL = os.getenv("BACKEND_URL")
 BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
+BASE_FILE_URL = f"https://api.telegram.org/file/bot{BOT_TOKEN}"
 
 if not BOT_TOKEN:
     raise RuntimeError("Missing TBOTAPI in env")
@@ -18,13 +19,14 @@ if not BACKEND_URL:
 
 bot_headers = {"Accept": "application/json"}
 
-class TelegramBot(BaseModel):
+class TelegramBot:
 
     def __init__(self, client: httpx.AsyncClient):
         self.client = client
         self._name = ""
 
     async def get_name(self, header: dict=bot_headers) -> str:
+        """Get the name of the bot"""
         try:
             request = await self.client.get(f"{BASE_URL}/getMe")
             request.raise_for_status()
@@ -41,14 +43,15 @@ class TelegramBot(BaseModel):
         Assign a webhook into our bot. Afer assigning
         """
         try:
-            r = await self.client.post(f"{BASE_URL}/setWebhook", json={'url': url}, timeout=5.0)
+            r = await self.client.post(f"{BASE_URL}/setWebhook", params={'url': url}, timeout=5.0)
             r.raise_for_status()
             data = r.json()
             return data.get("ok", False)
         except Exception as e:
-            raise e
+            raise HTTPException(500, str(e))
 
-    async def get_current_webhook(self):
+    async def get_current_webhook(self) -> dict:
+        """Check if the current bot already connected to a webhook"""
         try:
             result = await self.client.get(f"{BASE_URL}/getWebhookInfo")
             result.raise_for_status()
@@ -56,10 +59,40 @@ class TelegramBot(BaseModel):
         except Exception as e:
             raise e
 
-    async def delete_webhook(self):
+    async def delete_webhook(self) -> dict:
+        """Remove current webhook from the bot!"""
         try:
             result = await self.client.get(f"{BASE_URL}/deleteWebhook")
             result.raise_for_status()
             return result.json()
         except Exception as e:
             raise HTTPException(500, str(e))
+
+    async def get_file_location(self, file_id: str) -> dict:
+        try:
+            request = await self.client.get(f"{BASE_URL}/getFile", params={'file_id':file_id})
+            request.raise_for_status()
+            return request.json()
+        except Exception as e:
+            raise HTTPException(500, str(e))
+
+    async def get_file_data(self, file_id: str, mime_type: str) -> bytes:
+        """Grab the image data from telegram server"""
+        location = await self.get_file_location(file_id)
+        if location.json().get("ok"):
+            img_path = location.get("result").get("file_path")
+            img_response = await self.client.get(f"{BASE_FILE_URL}/{img_path}")
+
+            if img_response.status_code == 200:
+                img_data = img_response.content
+                return img_data
+            else:
+                raise HTTPException(img_response.status_code)
+        elif location.json().get("error_code"):
+            raise HTTPException(location.json().get("error_code"))
+
+    async def send_message_to_bot(self, chat_id: str, message: str) -> dict:
+        """Send back message to bot"""
+        message = await self.client.post(f"{BASE_URL}/sendMessage", params={"chat_id": chat_id, "text": message})
+
+        return message.json()

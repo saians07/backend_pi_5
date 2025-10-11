@@ -15,9 +15,13 @@ def create_bot() -> TelegramBot:
     return bot
 
 @router.post("/webhook", status_code=status.HTTP_200_OK)
-def telegram_webhook(payload: BotMessageInput):
+def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(create_bot)):
     """Endpoint where telegram will send the data to."""
-    return payload
+    chat_id = payload.get("chat_id")
+    message = payload
+
+    msg = bot.send_message_to_bot(chat_id, message)
+    return msg
 
 @router.post("/set_webhook", status_code=status.HTTP_200_OK)
 async def set_telegram_webhook(dto: BotWebhook, bot: TelegramBot=Depends(create_bot)):
@@ -61,5 +65,3 @@ async def delete_telegram_webhook(bot: TelegramBot=Depends(create_bot)):
         return {'message': res.get("description"), 'status_code': status.HTTP_200_OK}
     except Exception as e:
         raise HTTPException(500, str(e))
-
-# TODO: add getFile and sendMessage function in core.
