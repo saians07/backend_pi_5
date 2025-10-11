@@ -19,7 +19,7 @@ async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(ge
     """Endpoint where telegram will send the data to."""
     message = None
     # photo = None
-    LOG.info(f"receiving new payload \n {payload}")
+    LOG.info("receiving new payload \n %s", payload)
     chat_id = payload.message.chat.id
 
     if payload.message.entities:
@@ -36,7 +36,7 @@ async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(ge
 
             await bot.send_message_to_bot(chat_id, message=msg)
         except Exception as e:
-            raise HTTPException(500, detail=str(e))
+            raise HTTPException(500, detail=str(e)) from e
 
     if payload.message.text:
         if payload.message.caption:

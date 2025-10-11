@@ -7,7 +7,9 @@ from core.telegram import TelegramBot
 
 LOG.info("Starting Backend Pi 5 Applications ...")
 
+# pylint: disable=W0621
 async def lifespan(app: FastAPI):
+    """Ensure the object will only be expanded once"""
     client = httpx.AsyncClient()
     bot = TelegramBot(client)
     app.state.bot = bot
