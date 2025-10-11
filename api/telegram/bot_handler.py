@@ -16,13 +16,13 @@ def create_bot() -> TelegramBot:
     return bot
 
 @router.post("/webhook", status_code=status.HTTP_200_OK)
-def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(create_bot)):
+async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(create_bot)):
     """Endpoint where telegram will send the data to."""
     chat_id = payload.message.chat.id
     message = payload.message.text or payload.message.caption or \
         "Tidak ada pesan string untuk ditampilkan"
 
-    msg = bot.send_message_to_bot(chat_id, message)
+    msg = await bot.send_message_to_bot(chat_id, message)
     return msg
 
 @router.post("/set_webhook", status_code=status.HTTP_200_OK)
