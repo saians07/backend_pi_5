@@ -1,5 +1,6 @@
+# pylint: disable=C0114
 from typing import Optional, List
-from pydantic import BaseModel, Field # pylint disable: C0114
+from pydantic import BaseModel, Field
 
 class BotWebhook(BaseModel):
     """Parsing Raw Webhook URL From User"""

@@ -1,4 +1,4 @@
-# pylint disable: C0114
+# pylint: disable=C0114
 import os
 from dotenv import load_dotenv
 import httpx
@@ -82,18 +82,18 @@ class TelegramBot:
     async def get_file_data(self, file_id: str) -> bytes:
         """Grab the image data from telegram server"""
         location = await self.get_file_location(file_id)
-        if location.json().get("ok"):
-            img_path = location.get("result").get("file_path")
-            img_response = await self.client.get(f"{BASE_FILE_URL}/{img_path}")
-
-            if img_response.status_code != 200:
-                raise HTTPException(img_response.status_code)
-
-            img_data = img_response.content
-            return img_data
-
-        elif location.json().get("error_code"):
+        if location.json().get("error_code"):
             raise HTTPException(location.json().get("error_code"))
+
+        img_path = location.get("result").get("file_path")
+        img_response = await self.client.get(f"{BASE_FILE_URL}/{img_path}")
+
+        if img_response.status_code != 200:
+            raise HTTPException(img_response.status_code)
+
+        img_data = img_response.content
+        return img_data
+
 
     async def send_message_to_bot(self, chat_id: str, message: str) -> dict:
         """Send back message to bot"""
