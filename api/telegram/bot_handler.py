@@ -31,7 +31,7 @@ async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(ge
             "content": payload.message.text
         }
         try:
-            resp = ask_gemini(user_parts)
+            resp = await ask_gemini(user_parts)
             msg = resp.choices[0].message.content
 
             await bot.send_message_to_bot(chat_id, message=msg)
