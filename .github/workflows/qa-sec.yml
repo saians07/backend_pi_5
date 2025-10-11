@@ -33,8 +33,13 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pylint
+          pip install pylint pre-commit
           pip install -r requirements.txt
+      
+      - name: Run Whitestspace Trail Remover
+        uses: pre-commit/action@v3.0.0
+        with:
+          warn-only: true
 
       - name: Analyze the lint
         run: |

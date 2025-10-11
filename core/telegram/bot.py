@@ -35,7 +35,7 @@ class TelegramBot:
             if not self._name:
                 raise ValueError("There is no bot name found!")
 
-            return
+            return self._name
 
         except HTTPException as e:
             raise e
@@ -72,12 +72,9 @@ class TelegramBot:
 
     async def get_file_location(self, file_id: str) -> dict:
         """Grab file location from telegrams file server"""
-        try:
-            request = await self.client.get(f"{BASE_URL}/getFile", params={'file_id':file_id})
-            request.raise_for_status()
-            return request.json()
-        except Exception as e:
-            raise e
+        request = await self.client.get(f"{BASE_URL}/getFile", params={'file_id':file_id})
+        request.raise_for_status()
+        return request.json()
 
     async def get_file_data(self, file_id: str) -> bytes:
         """Grab the image data from telegram server"""
