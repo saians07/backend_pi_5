@@ -2,4 +2,4 @@
 from core.telegram.schema import BotWebhook, BotMessageInput
 from core.telegram.bot import TelegramBot
 
-BASE_API = "/v1/api"
+BASE_API = "/api/v1"
