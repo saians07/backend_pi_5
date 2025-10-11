@@ -20,22 +20,24 @@ if not BACKEND_URL:
 bot_headers = {"Accept": "application/json"}
 
 class TelegramBot:
-
+    """Bot Client"""
     def __init__(self, client: httpx.AsyncClient):
+        """Bot constructor"""
         self.client = client
         self._name = ""
 
-    async def get_name(self, header: dict=bot_headers) -> str:
+    async def get_name(self) -> str:
         """Get the name of the bot"""
         try:
             request = await self.client.get(f"{BASE_URL}/getMe")
             request.raise_for_status()
             self._name = request.json().get("result").get("first_name")
-            if self._name:
-                return
-            else:
+            if not self._name:
                 raise ValueError("There is no bot name found!")
-        except Exception as e:
+            
+            return
+                
+        except HTTPException as e:
             raise e
 
     async def set_webhook(self, url: str) -> bool:
@@ -48,7 +50,7 @@ class TelegramBot:
             data = r.json()
             return data.get("ok", False)
         except Exception as e:
-            raise HTTPException(500, str(e))
+            raise e
 
     async def get_current_webhook(self) -> dict:
         """Check if the current bot already connected to a webhook"""
@@ -66,17 +68,18 @@ class TelegramBot:
             result.raise_for_status()
             return result.json()
         except Exception as e:
-            raise HTTPException(500, str(e))
+            raise e
 
     async def get_file_location(self, file_id: str) -> dict:
+        """Grab file location from telegrams file server"""
         try:
             request = await self.client.get(f"{BASE_URL}/getFile", params={'file_id':file_id})
             request.raise_for_status()
             return request.json()
         except Exception as e:
-            raise HTTPException(500, str(e))
+            raise e
 
-    async def get_file_data(self, file_id: str, mime_type: str) -> bytes:
+    async def get_file_data(self, file_id: str) -> bytes:
         """Grab the image data from telegram server"""
         location = await self.get_file_location(file_id)
         if location.json().get("ok"):
@@ -93,6 +96,9 @@ class TelegramBot:
 
     async def send_message_to_bot(self, chat_id: str, message: str) -> dict:
         """Send back message to bot"""
-        message = await self.client.post(f"{BASE_URL}/sendMessage", params={"chat_id": chat_id, "text": message})
+        message = await self.client.post(
+            f"{BASE_URL}/sendMessage",
+            params={"chat_id": chat_id, "text": message}
+        )
 
         return message.json()

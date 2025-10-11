@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, HTTPException, Depends
+from fastapi import APIRouter, status, HTTPException, Depends # disable lint: C0114
 import httpx
 from core.telegram import (
     BotWebhook,
@@ -25,43 +25,53 @@ def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(create_b
 
 @router.post("/set_webhook", status_code=status.HTTP_200_OK)
 async def set_telegram_webhook(dto: BotWebhook, bot: TelegramBot=Depends(create_bot)):
+    """Set the telegram webhook to new webhook"""
     url = dto.url
-    
+
     # always use try catch block
     try:
         curr_webhook = await bot.get_current_webhook()
         # first, we need to check if there is an active webhook
         if curr_webhook.get("result").get("url"):
-            raise HTTPException(400, "There is an active webhook attached to the bot. Delete it first!")
+            raise HTTPException(
+                400,
+                """
+                There is an active webhook attached to the bot. Delete it first!
+                """
+            )
 
         # only set the webhook when there is no active webhook attached
         is_webhooked = await bot.set_webhook(url)
-        if is_webhooked:
-            return {
-                'status': "Success",
-                'message': f"You have successfully attach {url} to the bot!",
-                'status_code': status.HTTP_200_OK
-            }
-        else:
+        if not is_webhooked:
             raise HTTPException(400, "Bad Request!")
+
+        return {
+            'status': "Success",
+            'message': f"You have successfully attach {url} to the bot!",
+            'status_code': status.HTTP_200_OK
+        }
+            
     except Exception as e:
-        raise HTTPException(500, str(e))
+        raise e
 
 @router.get("/get_webhook", status_code=status.HTTP_200_OK)
 async def get_telegram_webhook(bot: TelegramBot=Depends(create_bot)):
+    """Get telegram webhook connected to the bot"""
     try:
         curr_webhook = await bot.get_current_webhook()
-        if curr_webhook.get("result").get("url"):
-            return curr_webhook
-        else:
-            raise HTTPException(404, "No webhook found!")
+        if not curr_webhook.get("result").get("url"):
+            raise HTTPException(404)
+        
+        return curr_webhook
+            
     except Exception as e:
-        raise HTTPException(500, str(e))
+        raise e
 
 @router.get("/delete_webhook", status_code=status.HTTP_200_OK)
 async def delete_telegram_webhook(bot: TelegramBot=Depends(create_bot)):
+    """Delete the webhook connected to the bot"""
     try:
         res = await bot.delete_webhook()
         return {'message': res.get("description"), 'status_code': status.HTTP_200_OK}
     except Exception as e:
-        raise HTTPException(500, str(e))
+        raise e

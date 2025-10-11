@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter # disable lint: C0114
 from api.telegram.bot_handler import router
 
 BASE_API = "/api/v1"
