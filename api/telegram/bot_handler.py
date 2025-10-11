@@ -6,6 +6,7 @@ from core.telegram import (
     BotMessageInput,
     TelegramBot
 )
+from core.logger import LOG
 
 router = APIRouter(prefix="/telegram", tags=["telegram"])
 
@@ -18,6 +19,7 @@ def create_bot() -> TelegramBot:
 @router.post("/webhook", status_code=status.HTTP_200_OK)
 async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(create_bot)):
     """Endpoint where telegram will send the data to."""
+    LOG.info(f"receiving new payload \n {payload}")
     chat_id = payload.message.chat.id
     message = payload.message.text or payload.message.caption or \
         "Tidak ada pesan string untuk ditampilkan"
