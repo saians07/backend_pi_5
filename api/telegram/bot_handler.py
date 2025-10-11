@@ -10,11 +10,12 @@ from api.ai import ask_gemini
 
 router = APIRouter(prefix="/telegram", tags=["telegram"])
 
-async def create_bot() -> TelegramBot:
+async def get_bot() -> TelegramBot:
+    """Get state of the bot from main app"""
     return Request.app.state.bot
 
 @router.post("/webhook", status_code=status.HTTP_200_OK)
-async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(create_bot)):
+async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(get_bot)):
     """Endpoint where telegram will send the data to."""
     message = None
     # photo = None
@@ -54,7 +55,7 @@ async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(cr
     return msg
 
 @router.post("/set_webhook", status_code=status.HTTP_200_OK)
-async def set_telegram_webhook(dto: BotWebhook, bot: TelegramBot=Depends(create_bot)):
+async def set_telegram_webhook(dto: BotWebhook, bot: TelegramBot=Depends(get_bot)):
     """Set the telegram webhook to new webhook"""
     url = dto.url
 
@@ -85,7 +86,7 @@ async def set_telegram_webhook(dto: BotWebhook, bot: TelegramBot=Depends(create_
         raise e
 
 @router.get("/get_webhook", status_code=status.HTTP_200_OK)
-async def get_telegram_webhook(bot: TelegramBot=Depends(create_bot)):
+async def get_telegram_webhook(bot: TelegramBot=Depends(get_bot)):
     """Get telegram webhook connected to the bot"""
     try:
         curr_webhook = await bot.get_current_webhook()
@@ -98,7 +99,7 @@ async def get_telegram_webhook(bot: TelegramBot=Depends(create_bot)):
         raise e
 
 @router.get("/delete_webhook", status_code=status.HTTP_200_OK)
-async def delete_telegram_webhook(bot: TelegramBot=Depends(create_bot)):
+async def delete_telegram_webhook(bot: TelegramBot=Depends(get_bot)):
     """Delete the webhook connected to the bot"""
     try:
         res = await bot.delete_webhook()
