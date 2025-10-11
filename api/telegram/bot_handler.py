@@ -18,13 +18,8 @@ def create_bot() -> TelegramBot:
 @router.post("/webhook", status_code=status.HTTP_200_OK)
 def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(create_bot)):
     """Endpoint where telegram will send the data to."""
-<<<<<<< HEAD
     chat_id = payload.chat_id
     message = payload.message
-=======
-    chat_id = payload.get("chat_id")
-    message = payload
->>>>>>> release_candidate
 
     msg = bot.send_message_to_bot(chat_id, message)
     return msg
