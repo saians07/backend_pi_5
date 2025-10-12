@@ -1,3 +1,4 @@
+#!/bin/bash
 echo "Start deploying process ..."
 
 cd ~/very_private_repo
