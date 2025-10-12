@@ -20,39 +20,45 @@ async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(ge
     message = None
     # photo = None
     LOG.info("receiving new payload \n %s", payload)
-    chat_id = payload.message.chat.id
+    if payload.message and payload.message.chat:
+        chat_id = payload.message.chat.id
 
-    if payload.message.entities:
-        pass # come here if it is a command
+        if payload.message.entities:
+            pass # come here if it is a command
 
-    if payload.message.text:
-        user_parts = {
-            "role": "user",
-            "content": payload.message.text
-        }
-        try:
-            resp = await ask_gemini(user_parts)
-            msg = resp.choices[0].message.content
+        if payload.message.text:
+            user_parts = {
+                "role": "user",
+                "content": payload.message.text
+            }
+            try:
+                resp = await ask_gemini(user_parts)
+                msg = resp.choices[0].message.content
+                LOG.info("Message from Gemini: %s", msg)
 
-            await bot.send_message_to_bot(chat_id, message=msg)
-        except Exception as e:
-            raise HTTPException(500, detail=str(e)) from e
+                await bot.send_message_to_bot(chat_id, message=msg)
+            except Exception as e:
+                raise HTTPException(500, detail=str(e)) from e
 
-    if payload.message.text:
-        if payload.message.caption:
-            pass # here we will check if it has caption
-        else:
-            pass
+        if payload.message.text:
+            if payload.message.caption:
+                pass # here we will check if it has caption
+            else:
+                pass
 
-    if payload.message.document:
-        if payload.message.caption:
-            pass # here we will check if it has caption
-        else:
-            pass
+        if payload.message.document:
+            if payload.message.caption:
+                pass # here we will check if it has caption
+            else:
+                pass
 
-
-    msg = await bot.send_message_to_bot(chat_id, message=message)
-    return msg
+        msg = await bot.send_message_to_bot(chat_id, message=message)
+        return msg
+    
+    if payload.chat_member:
+        pass
+        # TODO: implement the logic when we have a new chat member update
+        # TODO: create a handler for each type of message
 
 @router.post("/set_webhook", status_code=status.HTTP_200_OK)
 async def set_telegram_webhook(dto: BotWebhook, bot: TelegramBot=Depends(get_bot)):
