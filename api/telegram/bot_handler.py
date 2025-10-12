@@ -1,4 +1,4 @@
-# pylint: disable=C0114
+# pylint: disable=C0114, W0511
 from fastapi import APIRouter, status, HTTPException, Depends, Request
 from core.telegram import (
     BotWebhook,
