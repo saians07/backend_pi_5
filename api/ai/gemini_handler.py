@@ -19,6 +19,7 @@ if not GEMINI_API_KEY:
 
 async def ask_gemini(user_parts: dict, system_prompt: str=None):
     """Execute function to call gemini"""
+    LOG.info("Asking Gemini...")
     resp = await base_command(
         base_url=BASE_URL_GEMINI,
         model="gemini-2.5-flash",
@@ -26,4 +27,6 @@ async def ask_gemini(user_parts: dict, system_prompt: str=None):
         system_prompt=BASE_PROMPT if not system_prompt else system_prompt,
         user_parts=user_parts
     )
+    LOG.debug("Answer: %s", resp.choices[0])
+    LOG.info("Gemini done answering.")
     return resp
