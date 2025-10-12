@@ -12,7 +12,7 @@ services:
     environment:
       - PORT=8080
       - APP_ENV=production
-    command: ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-t", "120", "-w", "4", "-b", "0.0.0.0:8080", "--keep-alive", "150", "--log-level", "info", "main:app"]
+    command: ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-t", "120", "-w", "4", "-b", "0.0.0.0:8080", "--keep-alive", "150", "--log-level", "debug", "main:app"]
 
 networks:
   unified_network:
