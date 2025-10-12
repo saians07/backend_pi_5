@@ -62,7 +62,10 @@ class BotMessage(BotMessageBase):
     reply_to_message: Optional[BotMessageBase] = None
 
 class BotMessageInput(BaseModel):
-    """Parsing message directly accepted from user"""
+    """
+        Parsing message directly accepted from user
+        Source: https://core.telegram.org/bots/api#chatmemberupdated
+    """
     update_id: int
     message: Optional[BotMessage] = None
     edited_message: Optional[any] = None
