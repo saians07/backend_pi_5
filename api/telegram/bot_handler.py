@@ -1,4 +1,4 @@
-# pylint: disable=C0114, W0511
+# pylint: disable=C0114, W0511, R0912
 from math import ceil
 from fastapi import APIRouter, status, HTTPException, Depends, Request
 from core.telegram import (
