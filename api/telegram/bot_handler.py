@@ -38,7 +38,9 @@ async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(ge
                 msg = resp.choices[0].message.content
                 LOG.info("Message from Gemini: %s", msg)
 
-                await bot.send_message_to_bot(chat_id, message=msg)
+                res = await bot.send_message_to_bot(chat_id, message=msg)
+                LOG.info("Sending message back to user: %s", msg)
+                return res
             except Exception as e:
                 raise HTTPException(500, detail=str(e)) from e
 
