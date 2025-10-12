@@ -1,4 +1,5 @@
 # pylint: disable=C0114, W0511
+from math import ceil
 from fastapi import APIRouter, status, HTTPException, Depends, Request
 from core.telegram import (
     BotWebhook,
@@ -37,10 +38,16 @@ async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(ge
                 resp = await ask_gemini(user_parts)
                 msg = resp.choices[0].message.content
                 LOG.info("Message from Gemini: %s", msg)
+                # since the message from the AI can be long, we need to chunk it out.
+                chunks = ceil(len(msg)/4000)
+                for idx in range(0,chunks):
+                    idx_next = (idx + 1) * 4000 # telegram max accept 4000 character
+                    message = msg[(idx*4000):idx_next]
+                    if idx < chunks:
+                        message += '- [Cont.]'
+                    await bot.send_message_to_bot(chat_id, message=message)
 
-                res = await bot.send_message_to_bot(chat_id, message=msg)
-                LOG.info("Sending message back to user: %s", msg)
-                return res
+                return msg
             except Exception as e:
                 raise HTTPException(500, detail=str(e)) from e
 
