@@ -17,6 +17,8 @@ async def get_bot(request: Request) -> TelegramBot:
 @router.post("/webhook", status_code=status.HTTP_200_OK)
 async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(get_bot)):
     """Endpoint where telegram will send the data to."""
+    # TODO: implement the logic when we have a new chat member update
+    # TODO: create a handler for each type of message
     message = None
     # photo = None
     LOG.info("receiving new payload \n %s", payload)
@@ -54,11 +56,9 @@ async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(ge
 
         msg = await bot.send_message_to_bot(chat_id, message=message)
         return msg
-    
+
     if payload.chat_member:
         pass
-        # TODO: implement the logic when we have a new chat member update
-        # TODO: create a handler for each type of message
 
 @router.post("/set_webhook", status_code=status.HTTP_200_OK)
 async def set_telegram_webhook(dto: BotWebhook, bot: TelegramBot=Depends(get_bot)):
