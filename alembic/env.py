@@ -9,8 +9,9 @@ from alembic import context
 
 from database.base import DATABASE_URL, Base
 from database.telegram_bot_chat import (
+    BotChatHistory,
     BotUserMapping,
-    BotChatHistory
+    BotUserSummary
 )
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
