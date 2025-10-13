@@ -66,6 +66,9 @@ def run_migrations_online() -> None:
     connectable = create_engine(
         DATABASE_URL,
         poolclass=pool.NullPool
+    connectable = create_engine(
+        DATABASE_URL,
+        poolclass=pool.NullPool
     )
 
     with connectable.connect() as connection:
