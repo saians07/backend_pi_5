@@ -2,7 +2,7 @@
 import os
 import sys
 
- from sqlalchemy import create_engine
+from sqlalchemy import create_engine
 from sqlalchemy import pool
 
 from alembic import context
