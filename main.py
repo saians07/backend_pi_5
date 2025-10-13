@@ -1,24 +1,14 @@
 # pylint: disable=C0114
 from fastapi import FastAPI, HTTPException, status
-import httpx
 from api import telegram_router
 from core.logger import LOG
-from core.telegram import TelegramBot
-from database.base import DBSession
+from utils.manager import lifespan, create_all_table
 
 LOG.info("Starting Backend Pi 5 Applications ...")
 
-# pylint: disable=W0621
-async def lifespan(app: FastAPI):
-    """Ensure the object will only be expanded once"""
-    client = httpx.AsyncClient()
-    bot = TelegramBot(client)
-    app.state.bot = bot
-    app.state.dbsession = DBSession()
-    yield
-    await client.aclose()
-
 app = FastAPI(title="Backend Raspberry Pi", lifespan=lifespan)
+
+_ = create_all_table()
 
 @app.get("/", status_code=status.HTTP_403_FORBIDDEN)
 def root():
