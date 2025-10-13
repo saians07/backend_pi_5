@@ -1,3 +1,4 @@
+# pylint: disable=C0114, R0903
 from datetime import datetime
 from typing import (
     Optional
@@ -16,6 +17,7 @@ from sqlalchemy.orm import (
 from database.base import Base
 
 class BotChatHistory(Base):
+    """Model to handle Chat History"""
     __tablename__ = 'telegram_bot_chat_history'
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -27,17 +29,19 @@ class BotChatHistory(Base):
     deleted_datetime: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
 class BotUserMapping(Base):
+    """Model to handle User Mapping"""
     __tablename__ = 'telegram_bot_user_mapping'
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(BigInteger)
     user_name: Mapped[str] = mapped_column(String(100))
     is_allowed: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_datetime: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    created_datetime: Mapped[datetime] = mapped_column(DateTime, server_default=func.now)
     updated_datetime: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     deleted_datetime: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
 class BotUserSummary(Base):
+    """Model to handle User Summary"""
     __tablename__ = 'telegram_bot_user_summary'
 
     id: Mapped[int] = mapped_column(primary_key=True)

@@ -1,3 +1,4 @@
+# pylint: disable=C0114, E1101, W0611
 import os
 import sys
 from logging.config import fileConfig

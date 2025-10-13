@@ -1,8 +1,8 @@
+# pylint: disable=C0114
 import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
 
 load_dotenv()
 
@@ -18,4 +18,4 @@ engine = create_engine(
     DATABASE_URL
 )
 
-DBSession = sessionmaker(autoflush=False, autocommit=False, bind=engine)
+DBSession = sessionmaker(autoflush=False, autocommit=False, bind=engine) # pylint: disable=C0103

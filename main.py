@@ -3,8 +3,8 @@ from fastapi import FastAPI, HTTPException, status
 import httpx
 from api import telegram_router
 from core.logger import LOG
-from database.base import DBSession
 from core.telegram import TelegramBot
+from database.base import DBSession
 
 LOG.info("Starting Backend Pi 5 Applications ...")
 
