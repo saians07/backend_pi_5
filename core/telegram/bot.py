@@ -96,7 +96,7 @@ class TelegramBot:
         """Send back message to bot"""
         message = await self.client.post(
             f"{BASE_URL}/sendMessage",
-            params={"chat_id": chat_id, "text": message}
+            params={"chat_id": chat_id, "text": message, 'parse_mode': "MarkdownV2"}
         )
 
         return message.json()
