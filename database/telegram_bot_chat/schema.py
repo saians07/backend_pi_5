@@ -1,4 +1,4 @@
-# pylint: disable=C0114, R0903
+# pylint: disable=C0114, R0903, E1102
 from datetime import datetime
 from typing import (
     Optional
@@ -24,7 +24,7 @@ class BotChatHistory(Base):
     update_id: Mapped[int] = mapped_column(BigInteger)
     parent_id: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
     user_id: Mapped[int] = mapped_column(BigInteger)
-    created_datetime: Mapped[datetime] = mapped_column(DateTime, server_default=func.now)
+    created_datetime: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_datetime: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     deleted_datetime: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
@@ -36,7 +36,7 @@ class BotUserMapping(Base):
     user_id: Mapped[int] = mapped_column(BigInteger)
     user_name: Mapped[str] = mapped_column(String(100))
     is_allowed: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_datetime: Mapped[datetime] = mapped_column(DateTime, server_default=func.now)
+    created_datetime: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_datetime: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     deleted_datetime: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
