@@ -1,9 +1,11 @@
 # pylint: disable=C0114, E1101, W0611
-import os
 import sys
+from pathlib import Path
+from logging.config import fileConfig
 
-from sqlalchemy import create_engine
-from sqlalchemy import pool
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from sqlalchemy import create_engine, pool
 
 from alembic import context
 
@@ -13,8 +15,6 @@ from database.telegram_bot_chat import (
     BotUserMapping,
     BotUserSummary
 )
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
