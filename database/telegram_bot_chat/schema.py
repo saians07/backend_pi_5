@@ -32,7 +32,7 @@ class BotUserMapping(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(BigInteger)
     user_name: Mapped[str] = mapped_column(String(100))
-    is_allowed: Mapped[bool] = mapped_column(Boolean)
+    is_allowed: Mapped[bool] = mapped_column(Boolean, default=True)
     created_datetime: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_datetime: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     deleted_datetime: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
