@@ -90,3 +90,7 @@ class BotMessageInput(BaseModel):
     chat_join_request: Optional[Any] = None
     chat_boost: Optional[Any] = None
     removed_chat_boost: Optional[Any] = None
+
+class BotAddUserPayload(BaseModel):
+    """Model to parse register user payload"""
+    user_id: int
