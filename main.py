@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException, status
 import httpx
 from api import telegram_router
 from core.logger import LOG
+from database.base import DBSession
 from core.telegram import TelegramBot
 
 LOG.info("Starting Backend Pi 5 Applications ...")
@@ -13,6 +14,7 @@ async def lifespan(app: FastAPI):
     client = httpx.AsyncClient()
     bot = TelegramBot(client)
     app.state.bot = bot
+    app.state.dbsession = DBSession()
     yield
     await client.aclose()
 
