@@ -63,10 +63,6 @@ if curl -f -s --max-time 30 http://localhost:$NEXT_PORT/health; then
         -H 'priority: u=1, i' \
         -H "referer: http://nginx.$BACKEND_URL/api/hosts/ed2557da-24bf-4fa1-8f8a-4a0761a1d8b5" \
 
-    alembic revision --autogenerate -m "Changes for deployment on $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-
-    alembic upgrade head
-
     echo "✅ Deployment successful to $NEXT environment"
 else
     echo "❌ Health check failed on $NEXT environment"
