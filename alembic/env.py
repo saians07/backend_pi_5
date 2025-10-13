@@ -1,9 +1,8 @@
 # pylint: disable=C0114, E1101, W0611
 import os
 import sys
-from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
+ from sqlalchemy import create_engine
 from sqlalchemy import pool
 
 from alembic import context
@@ -20,11 +19,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
-if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -69,11 +63,9 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        {},
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-        url=DATABASE_URL
+    connectable = create_engine(
+        DATABASE_URL,
+        poolclass=pool.NullPool
     )
 
     with connectable.connect() as connection:
