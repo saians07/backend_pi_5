@@ -4,3 +4,5 @@ gunicorn==23.0.0
 httpx==0.28.1
 openai==2.1.0
 sqlalchemy==2.0.44
+alembic==1.17.0
+psycopg2-binary==2.9.11
