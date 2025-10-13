@@ -24,7 +24,7 @@ class BotChatHistory(Base):
     update_id: Mapped[int] = mapped_column(BigInteger)
     parent_id: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
     user_id: Mapped[int] = mapped_column(BigInteger)
-    created_datetime: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    created_datetime: Mapped[datetime] = mapped_column(DateTime, server_default=func.now)
     updated_datetime: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     deleted_datetime: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
