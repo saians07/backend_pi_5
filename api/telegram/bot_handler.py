@@ -43,8 +43,10 @@ async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(ge
                 for idx in range(0,chunks):
                     idx_next = (idx + 1) * 4000 # telegram max accept 4000 character
                     message = msg[(idx*4000):idx_next]
-                    if idx < chunks:
-                        message += '- [Cont.]'
+                    if (idx+1) < chunks:
+                        message += '--[Cont.]'
+                    elif (idx+1) == chunks:
+                        message += '-- ❤️‍🔥 Bella Swan'
                     await bot.send_message_to_bot(chat_id, message=message)
 
                 return msg
