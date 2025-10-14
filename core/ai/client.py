@@ -16,20 +16,6 @@ async def base_command(base_url: str, model: str, user_parts: dict, \
         base_url=base_url,
         api_key=api_key
     )
-    # try:
-    #     resp = await client.responses.create(
-    #         model=model,
-    #         input=[
-    #             {"role": "developer", "content": system_prompt},
-    #             user_parts,
-    #         ]
-    #     )
-    #     final_resp = OpenAIStandarResponse(
-    #         id=resp.id,
-    #         model=resp.model,
-    #         output=[out for out in resp.output if out.type == "message"]
-    #     )
-    # except Exception:
     try:
         resp = await client.chat.completions.create(
             model=model,
@@ -64,5 +50,5 @@ async def base_command(base_url: str, model: str, user_parts: dict, \
             )
         )
         LOG.info("%s", str(e))
-    
+
     return final_resp
