@@ -2,8 +2,8 @@
 Base model schema for all AI related input output
 """
 
-from typing import List
-from pydantic import BaseModel
+from typing import List, Optional, Any
+from pydantic import BaseModel, Field
 
 class GeminiParts(BaseModel):
     """Gemini parts data"""
@@ -39,3 +39,44 @@ class GeminiResponse(BaseModel):
     usageMetadata: GeminiUsageMetadata
     modelVersion: str
     responseId: str
+
+class OpenAIChoice(BaseModel):
+    finish_reason: str
+    index: int
+    logprobs: Optional[Any]
+
+class OpenAICompletionUsage(BaseModel):
+    completion_tokens: int
+    prompt_tokens: int
+    total_tokens: int
+    completion_tokens_details: Optional[Any] = None
+    prompt_tokens_details: Optional[Any] = None
+
+class OpenAIChatCompletion(BaseModel):
+    id: str
+    choices: List[OpenAIChoice]
+    created: int
+    model: str
+    object_: str = Field(..., alias="object")
+    service_tier: Optional[Any] = None
+    system_fingerprint: Optional[Any] = None
+    usage: OpenAICompletionUsage
+
+class OpenAIContent(BaseModel):
+    type: str
+    text: str
+    annotations: Optional[List[Any]] = []
+    logprobs: Optional[List[Any]] = []
+
+class OpenAIOutput(BaseModel):
+    type: str
+    id: Optional[str] = None
+    status: Optional[str] = None
+    role: Optional[str] = None
+    content: Optional[OpenAIContent] = None
+
+class OpenAIStandarResponse(BaseModel):
+    id: Optional[str] = None
+    model: str
+    output: OpenAIOutput
+
