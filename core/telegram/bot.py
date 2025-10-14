@@ -92,11 +92,13 @@ class TelegramBot:
         return img_data
 
 
-    async def send_message_to_bot(self, chat_id: str, message: str) -> dict:
+    async def send_message_to_bot(self, chat_id: str, message: str) -> dict | HTTPException:
         """Send back message to bot"""
         message = await self.client.post(
             f"{BASE_URL}/sendMessage",
             params={"chat_id": chat_id, "text": message, 'parse_mode': "MarkdownV2"}
         )
+        if message.status_code != 200:
+            raise HTTPException(message.status_code)
 
         return message.json()
