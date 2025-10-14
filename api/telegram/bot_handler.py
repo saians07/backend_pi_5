@@ -41,7 +41,7 @@ async def user_message_handler(message:BotMessage, bot: TelegramBot) -> None:
                 if message.text == "/start":
                     msg = f"Halo selamat datang. Aku {BOT_NAME} siap membantu kamu.\
                         Ada yang ingin ditanyakan? -- ❤️‍🔥 {BOT_NAME}"
-                    await bot.send_message_to_bot(chat_id, message=msg)
+                    await bot.send_message_to_bot(chat_id, message=reserved_character_cleaner(msg))
 
                     return
 
@@ -55,7 +55,7 @@ async def user_message_handler(message:BotMessage, bot: TelegramBot) -> None:
             msg = f"Maaf, saat ini {BOT_NICKNAME} hanya melayani Berlin dan Swanti\
                 saja. -- ❤️‍🔥 {BOT_NAME}"
 
-            await bot.send_message_to_bot(chat_id, message=message)
+            await bot.send_message_to_bot(chat_id, message=reserved_character_cleaner(msg))
 
             return
 
@@ -65,11 +65,11 @@ async def user_message_handler(message:BotMessage, bot: TelegramBot) -> None:
             chunks = ceil(len(msg)/4000)
             for idx in range(0,chunks):
                 idx_next = (idx + 1) * 4000 # telegram max accept 4000 character
-                message = msg[(idx*4000):idx_next]
+                msg = msg[(idx*4000):idx_next]
                 if (idx+1) < chunks:
-                    message += '--[Cont.]'
-                message = reserved_character_cleaner(message)
-                await bot.send_message_to_bot(chat_id, message=message)
+                    msg += '--[Cont.]'
+                msg = reserved_character_cleaner(msg)
+                await bot.send_message_to_bot(chat_id, message=msg)
 
             return
 
