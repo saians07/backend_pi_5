@@ -41,11 +41,13 @@ class GeminiResponse(BaseModel):
     responseId: str
 
 class OpenAIChoice(BaseModel):
+    """OpenAI Choice output"""
     finish_reason: str
     index: int
     logprobs: Optional[Any]
 
 class OpenAICompletionUsage(BaseModel):
+    """OpenAI Usage output"""
     completion_tokens: int
     prompt_tokens: int
     total_tokens: int
@@ -53,6 +55,7 @@ class OpenAICompletionUsage(BaseModel):
     prompt_tokens_details: Optional[Any] = None
 
 class OpenAIChatCompletion(BaseModel):
+    """OpenAI Chat completion output"""
     id: str
     choices: List[OpenAIChoice]
     created: int
@@ -63,12 +66,14 @@ class OpenAIChatCompletion(BaseModel):
     usage: OpenAICompletionUsage
 
 class OpenAIContent(BaseModel):
+    """OpenAI content output"""
     type: str
     text: str
     annotations: Optional[List[Any]] = []
     logprobs: Optional[List[Any]] = []
 
 class OpenAIOutput(BaseModel):
+    """OpenAI basic output"""
     type: str
     id: Optional[str] = None
     status: Optional[str] = None
@@ -76,6 +81,7 @@ class OpenAIOutput(BaseModel):
     content: Optional[OpenAIContent] = None
 
 class OpenAIStandardResponse(BaseModel):
+    """OpenAI raw output"""
     id: Optional[str] = None
     model: str
     output: OpenAIOutput
