@@ -34,7 +34,7 @@ class BotUserMapping(Base):
     """Model to handle User Mapping"""
     __tablename__ = 'telegram_bot_user'
 
-    id: Mapped[int] = mapped_column(Integer, nprimary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(BigInteger)
     user_name: Mapped[str] = mapped_column(String(100))
     is_allowed: Mapped[bool] = mapped_column(Boolean, default=True)
