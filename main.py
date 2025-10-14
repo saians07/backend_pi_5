@@ -1,28 +1,24 @@
 # pylint: disable=C0114
-from flask import Flask, jsonify, request # pylint: disable=C0114
+from fastapi import FastAPI, HTTPException, status
+from api import telegram_router
+from core.logger import LOG
+from utils.manager import lifespan, create_all_table
 
-app = Flask(__name__)
+LOG.info("Starting Backend Pi 5 Applications ...")
 
-@app.route("/health", methods=["GET", "POST"])
-def health(): # pylint: disable=C0116
-    return jsonify({
-        'status': "ok"
-    }), 200
+app = FastAPI(title="Backend Raspberry Pi", lifespan=lifespan)
 
-BASE_API = "/api/v1/"
+create_all_table()
 
-@app.route(f"{BASE_API}create_table", methods=["POST"])
-def create_table(): # pylint: disable=C0116
-    data = request.json
+@app.get("/", status_code=status.HTTP_403_FORBIDDEN)
+def root():
+    """Visit root path"""
+    raise HTTPException(status_code=403, detail="Forbidden")
 
-    if not data.get("table_name"):
-        return jsonify(
-            {
-                'status': "FAILED",
-                'message': "You have to pass table_name when creating a table"
-            }
-        ), 400
+@app.get("/health")
+def health():
+    """Check health for the page"""
+    return {'status': "ok", 'status_code': status.HTTP_200_OK}
 
-    return jsonify({
-        'status': "OK"
-    }), 200
+# include telegram route
+app.include_router(telegram_router)

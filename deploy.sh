@@ -1,3 +1,4 @@
+#!/bin/bash
 echo "Start deploying process ..."
 
 cd ~/very_private_repo
@@ -23,7 +24,7 @@ fi
 
 echo "Deploying to: $NEXT environment (port: $NEXT)"
 docker compose --file docker_compose_$NEXT.yml down
-docker compose --file docker_compose_$NEXT.yml up -d
+docker compose --file docker_compose_$NEXT.yml up --pull always -d --build --remove-orphans
 
 sleep 10
 

@@ -1,5 +1,5 @@
 <h1 align="center">
-    Triple S
+    Backend Pi 5
 </h1>
 
 Official python backend for my raspberry pi-5.
