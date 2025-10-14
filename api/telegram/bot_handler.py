@@ -10,6 +10,7 @@ from core.telegram import (
 from core.ai import (
     BOT_NAME,
     BOT_NICKNAME,
+    BASE_PROMPT
 )
 from api.ai import ask_gemini
 
@@ -39,7 +40,7 @@ async def user_message_handler(message:BotMessage, bot: TelegramBot) -> None:
         if message.entities:
             if message.entities[0].type_ == "bot_command":
                 if message.text == "/start":
-                    msg = f"Halo selamat datang. Aku {BOT_NAME} siap membantu kamu.\
+                    msg = f"Halo {message.chat.first_name}. Aku {BOT_NAME} siap membantu kamu.\
                         Ada yang ingin ditanyakan? -- ❤️‍🔥 {BOT_NAME}"
                     await bot.send_message_to_bot(chat_id, message=reserved_character_cleaner(msg))
 
@@ -81,7 +82,10 @@ async def text_message_handler(message:BotMessage) -> str:
         "role": "user",
         "content": message.text
     }
-    resp = await ask_gemini(user_parts)
+    resp = await ask_gemini(user_parts, BASE_PROMPT.format(
+        BOT_NAME,
+        message.chat.first_name, BOT_NICKNAME
+    ))
     return resp.output.content.text
 
 async def user_command_handler(
@@ -92,7 +96,7 @@ async def user_command_handler(
         msg = f"Halo {name}. Kamu bisa bertanya apa saja yang kamu \
             ingin tanyakan kepadaku! Aku, {BOT_NAME} akan berusaha bantu."
 
-        await bot.send_message_to_bot(chat_id, message=msg)
+        await bot.send_message_to_bot(chat_id, message=reserved_character_cleaner(msg))
 
 def reserved_character_cleaner(msg: str) -> str:
     """Escape reserved character in markdownv2"""

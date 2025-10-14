@@ -5,7 +5,6 @@ import os
 from dotenv import load_dotenv
 from core.logger import LOG
 from core.ai import (
-    BASE_PROMPT,
     BASE_URL_GEMINI,
     base_command
 )
@@ -25,7 +24,7 @@ async def ask_gemini(user_parts: dict, system_prompt: str=None) -> OpenAIStandar
         base_url=BASE_URL_GEMINI,
         model="gemini-2.5-flash",
         api_key=GEMINI_API_KEY,
-        system_prompt=BASE_PROMPT if not system_prompt else system_prompt,
+        system_prompt=system_prompt,
         user_parts=user_parts
     )
     LOG.info("Gemini done answering.")
