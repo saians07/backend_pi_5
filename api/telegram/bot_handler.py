@@ -1,125 +1,81 @@
 # pylint: disable=C0114, W0511, R0912
 from math import ceil
-from fastapi import APIRouter, status, HTTPException, Depends, Request
+from fastapi import APIRouter
 from core.telegram import (
-    BotWebhook,
     BotMessageInput,
+    BotMessage,
+    BotEntities,
     TelegramBot
 )
-from core.logger import LOG
+from core.ai import (
+    BOT_NAME,
+    BOT_NICKNAME,
+)
 from api.ai import ask_gemini
 
 router = APIRouter(prefix="/telegram", tags=["telegram"])
 
-async def get_bot(request: Request) -> TelegramBot:
-    """Get state of the bot from main app"""
-    return request.app.state.bot
+async def bot_assistant(payload: BotMessageInput, bot: TelegramBot) -> None:
+    """
+        Process all input from users.
+        Return only string data, None when there is no
+    """
+    if payload.message:
+        await user_message_handler(payload.message, bot)
 
-@router.post("/webhook", status_code=status.HTTP_200_OK)
-async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(get_bot)):
-    """Endpoint where telegram will send the data to."""
-    # TODO: implement the logic when we have a new chat member update
-    # TODO: create a handler for each type of message
-    message = None
-    # photo = None
-    LOG.info("receiving new payload \n %s", payload)
-    if payload.message and payload.message.chat:
-        chat_id = payload.message.chat.id
+    return
 
-        if payload.message.entities:
-            pass # come here if it is a command
+async def user_message_handler(message:BotMessage, bot: TelegramBot) -> None:
+    """
+        Handle message from users. String only return
+    """
+    if message.chat:
+        chat_id = message.chat.id
+        if message.from_.username:
+            name = message.from_.username
+        else:
+            name = message.from_.first_name
 
-        if payload.message.text:
-            user_parts = {
-                "role": "user",
-                "content": payload.message.text
-            }
-            try:
-                resp = await ask_gemini(user_parts)
-                msg = resp.choices[0].message.content
-                LOG.info("Message from Gemini: %s", msg)
-                # since the message from the AI can be long, we need to chunk it out.
-                chunks = ceil(len(msg)/4000)
-                for idx in range(0,chunks):
-                    idx_next = (idx + 1) * 4000 # telegram max accept 4000 character
-                    message = msg[(idx*4000):idx_next]
-                    if (idx+1) < chunks:
-                        message += '--[Cont.]'
-                    elif (idx+1) == chunks:
-                        message += '-- ❤️‍🔥 Bella Swan'
-                    await bot.send_message_to_bot(chat_id, message=message)
+        if message.entities:
+            if message.entities.type_.find("start") >= 0:
+                msg = f"Halo selamat datang. Aku {BOT_NAME} siap membantu kamu.\
+                    Ada yang ingin ditanyakan? -- ❤️‍🔥 {BOT_NAME}"
+                await bot.send_message_to_bot(chat_id, message=msg)
 
-                return msg
-            except Exception as e:
-                raise HTTPException(500, detail=str(e)) from e
+            return await user_command_handler(message.entities, name, bot, chat_id)
 
-        if payload.message.text:
-            if payload.message.caption:
-                pass # here we will check if it has caption
-            else:
-                pass
+        if chat_id not in [683639588, 7703746371]:
+            return f"Maaf, saat ini {BOT_NICKNAME} hanya melayani Berlin dan Swanti\
+                saja. -- ❤️‍🔥 {BOT_NAME}"
 
-        if payload.message.document:
-            if payload.message.caption:
-                pass # here we will check if it has caption
-            else:
-                pass
+        if message.text:
+            msg = await text_message_handler(message)
 
-        msg = await bot.send_message_to_bot(chat_id, message=message)
-        return msg
+            chunks = ceil(len(msg)/4000)
+            for idx in range(0,chunks):
+                idx_next = (idx + 1) * 4000 # telegram max accept 4000 character
+                message = msg[(idx*4000):idx_next]
+                if (idx+1) < chunks:
+                    message += '--[Cont.]'
+                await bot.send_message_to_bot(chat_id, message=message)
 
-    if payload.chat_member:
-        pass
+            return msg
 
-@router.post("/set_webhook", status_code=status.HTTP_200_OK)
-async def set_telegram_webhook(dto: BotWebhook, bot: TelegramBot=Depends(get_bot)):
-    """Set the telegram webhook to new webhook"""
-    url = dto.url
+async def text_message_handler(message:BotMessage) -> str:
+    """Handling every text message from users"""
+    user_parts = {
+        "role": "user",
+        "content": message.text
+    }
+    resp = await ask_gemini(user_parts)
+    return resp.output.content.text
 
-    # always use try catch block
-    try:
-        curr_webhook = await bot.get_current_webhook()
-        # first, we need to check if there is an active webhook
-        if curr_webhook.get("result").get("url"):
-            raise HTTPException(
-                400,
-                """
-                There is an active webhook attached to the bot. Delete it first!
-                """
-            )
+async def user_command_handler(
+    entities: BotEntities, name: str, bot: TelegramBot, chat_id: int
+) -> str:
+    """Handling user command other than start"""
+    if entities.type_ == "/help":
+        msg = f"Halo {name}. Kamu bisa bertanya apa saja yang kamu \
+            ingin tanyakan kepadaku! Aku, {BOT_NAME} akan berusaha bantu."
 
-        # only set the webhook when there is no active webhook attached
-        is_webhooked = await bot.set_webhook(url)
-        if not is_webhooked:
-            raise HTTPException(400, "Bad Request!")
-
-        return {
-            'status': "Success",
-            'message': f"You have successfully attach {url} to the bot!",
-            'status_code': status.HTTP_200_OK
-        }
-
-    except Exception as e:
-        raise e
-
-@router.get("/get_webhook", status_code=status.HTTP_200_OK)
-async def get_telegram_webhook(bot: TelegramBot=Depends(get_bot)):
-    """Get telegram webhook connected to the bot"""
-    try:
-        curr_webhook = await bot.get_current_webhook()
-        if not curr_webhook.get("result").get("url"):
-            raise HTTPException(404)
-
-        return curr_webhook
-
-    except Exception as e:
-        raise e
-
-@router.get("/delete_webhook", status_code=status.HTTP_200_OK)
-async def delete_telegram_webhook(bot: TelegramBot=Depends(get_bot)):
-    """Delete the webhook connected to the bot"""
-    try:
-        res = await bot.delete_webhook()
-        return {'message': res.get("description"), 'status_code': status.HTTP_200_OK}
-    except Exception as e:
-        raise e
+        await bot.send_message_to_bot(chat_id, message=msg)

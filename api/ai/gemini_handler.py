@@ -9,6 +9,7 @@ from core.ai import (
     BASE_URL_GEMINI,
     base_command
 )
+from core.ai.schema import OpenAIStandardResponse
 
 load_dotenv()
 
@@ -17,8 +18,8 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     LOG.info("tidak ada key GEMINI_API_KEY di environment!")
 
-async def ask_gemini(user_parts: dict, system_prompt: str=None):
-    """Execute function to call gemini"""
+async def ask_gemini(user_parts: dict, system_prompt: str=None) -> OpenAIStandardResponse:
+    """Call gemini model to answer our inquiry. String only return."""
     LOG.info("Asking Gemini...")
     resp = await base_command(
         base_url=BASE_URL_GEMINI,
@@ -27,6 +28,5 @@ async def ask_gemini(user_parts: dict, system_prompt: str=None):
         system_prompt=BASE_PROMPT if not system_prompt else system_prompt,
         user_parts=user_parts
     )
-    LOG.debug("Answer: %s", resp.choices[0])
     LOG.info("Gemini done answering.")
     return resp
