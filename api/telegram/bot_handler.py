@@ -91,8 +91,9 @@ async def user_command_handler(
         await bot.send_message_to_bot(chat_id, message=msg)
 
 def reserved_character_cleaner(msg: str) -> str:
+    """Escape reserved character in markdownv2"""
     reserved_chars = r'_*[]()~`>#+-=|{}.!'
-    regex = r'([{}])'.format(re.escape(reserved_chars))
+    regex = fr"([{re.escape(reserved_chars)}])"
 
     escaped_msg = re.sub(regex, r'\\\1', msg)
 
