@@ -82,7 +82,10 @@ async def text_message_handler(message:BotMessage) -> str:
         "role": "user",
         "content": message.text
     }
-    resp = await ask_gemini(user_parts, BASE_PROMPT.format(BOT_NAME, message.chat.first_name, BOT_NICKNAME))
+    resp = await ask_gemini(user_parts, BASE_PROMPT.format(
+        BOT_NAME,
+        message.chat.first_name, BOT_NICKNAME
+    ))
     return resp.output.content.text
 
 async def user_command_handler(
