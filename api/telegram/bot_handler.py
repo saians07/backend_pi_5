@@ -38,7 +38,8 @@ async def user_message_handler(message:BotMessage, bot: TelegramBot) -> None:
 
         if message.entities:
             if message.entities.type_.find("start") >= 0:
-                msg = f"Halo selamat datang. Aku {BOT_NAME} siap membantu kamu. Ada yang ingin ditanyakan? -- ❤️‍🔥 {BOT_NAME}"
+                msg = f"Halo selamat datang. Aku {BOT_NAME} siap membantu kamu.\
+                    Ada yang ingin ditanyakan? -- ❤️‍🔥 {BOT_NAME}"
                 await bot.send_message_to_bot(chat_id, message=msg)
 
             return await user_command_handler(message.entities, name, bot, chat_id)
@@ -69,7 +70,9 @@ async def text_message_handler(message:BotMessage) -> str:
     resp = await ask_gemini(user_parts)
     return resp.output.content.text
 
-async def user_command_handler(entities: BotEntities, name: str, bot: TelegramBot, chat_id: int) -> str:
+async def user_command_handler(
+    entities: BotEntities, name: str, bot: TelegramBot, chat_id: int
+) -> str:
     """Handling user command other than start"""
     if entities.type_ == "/help":
         msg = f"Halo {name}. Kamu bisa bertanya apa saja yang kamu \
