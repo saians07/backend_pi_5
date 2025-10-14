@@ -85,4 +85,3 @@ class OpenAIStandardResponse(BaseModel):
     id: Optional[str] = None
     model: str
     output: OpenAIOutput
-

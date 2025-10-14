@@ -4,7 +4,7 @@
 """
 from fastapi import FastAPI
 import httpx
-from core.telegram.bot import TelegramBot
+from core.telegram import TelegramBot
 from database.base import DBSession, Base, engine
 from database.telegram_bot_chat import (
     BotChatHistory,
