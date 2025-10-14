@@ -22,8 +22,6 @@ async def bot_assistant(payload: BotMessageInput, bot: TelegramBot) -> None:
     """
     if payload.message:
         await user_message_handler(payload.message)
-    # elif payload.chat_member:
-    #     chat_member_handler(payload.chat_member)
     
     return
 
