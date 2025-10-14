@@ -21,7 +21,7 @@ async def bot_assistant(payload: BotMessageInput, bot: TelegramBot) -> None:
         Return only string data, None when there is no
     """
     if payload.message:
-        await user_message_handler(payload.message)
+        await user_message_handler(payload.message, bot)
 
     return
 
@@ -38,9 +38,10 @@ async def user_message_handler(message:BotMessage, bot: TelegramBot) -> None:
 
         if message.entities:
             if message.entities.type_.find("start") >= 0:
-                return f"Halo selamat datang. Aku {BOT_NAME} siap membantu kamu. Ada yang ingin ditanyakan? -- ❤️‍🔥 {BOT_NAME}"
-            else:
-                return user_command_handler(message.entities, name)
+                msg = f"Halo selamat datang. Aku {BOT_NAME} siap membantu kamu. Ada yang ingin ditanyakan? -- ❤️‍🔥 {BOT_NAME}"
+                await bot.send_message_to_bot(chat_id, message=msg)
+
+            return await user_command_handler(message.entities, name, bot, chat_id)
 
         if chat_id not in [683639588, 7703746371]:
             return f"Maaf, saat ini {BOT_NICKNAME} hanya melayani Berlin dan Swanti\
@@ -60,6 +61,7 @@ async def user_message_handler(message:BotMessage, bot: TelegramBot) -> None:
             return msg
 
 async def text_message_handler(message:BotMessage) -> str:
+    """Handling every text message from users"""
     user_parts = {
         "role": "user",
         "content": message.text
@@ -67,8 +69,10 @@ async def text_message_handler(message:BotMessage) -> str:
     resp = await ask_gemini(user_parts)
     return resp.output.content.text
 
-def user_command_handler(entities: BotEntities, name: str) -> str:
-        """Handling user command other than start"""
-        if entities.type_ == "/help":
-            msg = f"Halo {name}. Kamu bisa bertanya apa saja yang kamu \
-                ingin tanyakan kepadaku! Aku, {BOT_NAME} akan berusaha bantu."
+async def user_command_handler(entities: BotEntities, name: str, bot: TelegramBot, chat_id: int) -> str:
+    """Handling user command other than start"""
+    if entities.type_ == "/help":
+        msg = f"Halo {name}. Kamu bisa bertanya apa saja yang kamu \
+            ingin tanyakan kepadaku! Aku, {BOT_NAME} akan berusaha bantu."
+
+        await bot.send_message_to_bot(chat_id, message=msg)
