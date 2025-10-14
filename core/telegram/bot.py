@@ -96,7 +96,8 @@ class TelegramBot:
         """Send back message to bot"""
         message = await self.client.post(
             f"{BASE_URL}/sendMessage",
-            params={"chat_id": chat_id, "text": message, 'parse_mode': "MarkdownV2"}
+            params={"chat_id": chat_id, "text": message, 'parse_mode': "MarkdownV2"},
+            headers={"Content-Type":"application/json"}
         )
         if message.status_code != 200:
             raise HTTPException(message.status_code)
