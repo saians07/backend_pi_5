@@ -79,4 +79,3 @@ async def delete_telegram_webhook(bot: TelegramBot=Depends(get_bot)):
         return {'message': res.get("description"), 'status_code': status.HTTP_200_OK}
     except Exception as e:
         raise e
-
