@@ -5,7 +5,6 @@ from fastapi import APIRouter
 from core.telegram import (
     BotMessageInput,
     BotMessage,
-    BotEntities,
     TelegramBot
 )
 from core.ai import (
