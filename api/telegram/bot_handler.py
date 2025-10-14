@@ -22,7 +22,7 @@ async def bot_assistant(payload: BotMessageInput, bot: TelegramBot) -> None:
     """
     if payload.message:
         await user_message_handler(payload.message)
-    
+
     return
 
 async def user_message_handler(message:BotMessage, bot: TelegramBot) -> None:
@@ -45,7 +45,7 @@ async def user_message_handler(message:BotMessage, bot: TelegramBot) -> None:
         if chat_id not in [683639588, 7703746371]:
             return f"Maaf, saat ini {BOT_NICKNAME} hanya melayani Berlin dan Swanti\
                 saja. -- ❤️‍🔥 {BOT_NAME}"
-        
+
         if message.text:
             msg = await text_message_handler(message)
 
@@ -56,7 +56,7 @@ async def user_message_handler(message:BotMessage, bot: TelegramBot) -> None:
                 if (idx+1) < chunks:
                     message += '--[Cont.]'
                 await bot.send_message_to_bot(chat_id, message=message)
-            
+
             return msg
 
 async def text_message_handler(message:BotMessage) -> str:
