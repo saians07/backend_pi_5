@@ -38,14 +38,19 @@ async def user_message_handler(message:BotMessage, bot: TelegramBot) -> None:
             name = message.from_.first_name
 
         if message.entities:
-            if message.entities.type_.find("start") >= 0:
-                msg = f"Halo selamat datang. Aku {BOT_NAME} siap membantu kamu.\
-                    Ada yang ingin ditanyakan? -- ❤️‍🔥 {BOT_NAME}"
-                await bot.send_message_to_bot(chat_id, message=msg)
+            if message.entities[0].type_ == "bot_command":
+                if message.text == "/start":
+                    msg = f"Halo selamat datang. Aku {BOT_NAME} siap membantu kamu.\
+                        Ada yang ingin ditanyakan? -- ❤️‍🔥 {BOT_NAME}"
+                    await bot.send_message_to_bot(chat_id, message=msg)
+
+                    return
+
+                await user_command_handler(message.text, name, bot, chat_id)
 
                 return
 
-            await user_command_handler(message.entities, name, bot, chat_id)
+            return
 
         if chat_id not in [683639588, 7703746371]:
             msg = f"Maaf, saat ini {BOT_NICKNAME} hanya melayani Berlin dan Swanti\
@@ -81,10 +86,10 @@ async def text_message_handler(message:BotMessage) -> str:
     return resp.output.content.text
 
 async def user_command_handler(
-    entities: BotEntities, name: str, bot: TelegramBot, chat_id: int
+    command: str, name: str, bot: TelegramBot, chat_id: int
 ) -> str:
     """Handling user command other than start"""
-    if entities.type_ == "/help":
+    if command == "/help":
         msg = f"Halo {name}. Kamu bisa bertanya apa saja yang kamu \
             ingin tanyakan kepadaku! Aku, {BOT_NAME} akan berusaha bantu."
 
