@@ -22,10 +22,10 @@ async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(ge
 
     await bot_assistant(payload, bot)
 
-    return HTTPException(
-        status.HTTP_202_ACCEPTED,
-        "Oke, your inquiry has been accepted. Please wait!"
-    )
+    return {
+        'status': status.HTTP_202_ACCEPTED,
+        'message': "Your request has been accepted."
+    }
 
 @telegram_router.post("/set_webhook", status_code=status.HTTP_200_OK)
 async def set_telegram_webhook(dto: BotWebhook, bot: TelegramBot=Depends(get_bot)):
@@ -79,3 +79,4 @@ async def delete_telegram_webhook(bot: TelegramBot=Depends(get_bot)):
         return {'message': res.get("description"), 'status_code': status.HTTP_200_OK}
     except Exception as e:
         raise e
+
