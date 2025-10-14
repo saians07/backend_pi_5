@@ -8,7 +8,7 @@ LOG.info("Starting Backend Pi 5 Applications ...")
 
 app = FastAPI(title="Backend Raspberry Pi", lifespan=lifespan)
 
-_ = create_all_table()
+create_all_table()
 
 @app.get("/", status_code=status.HTTP_403_FORBIDDEN)
 def root():
