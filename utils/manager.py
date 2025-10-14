@@ -1,3 +1,4 @@
+# pylint: disable=W0611
 """
     Inject all clients, object classes, and tables needed by the main application
 """
@@ -26,4 +27,7 @@ async def lifespan(app: FastAPI):
     await dbsession.close()
 
 def create_all_table():
+    """
+        Create all needed table into postgres
+    """
     Base.metadata.create_all(engine)
