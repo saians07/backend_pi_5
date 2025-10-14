@@ -75,7 +75,7 @@ class OpenAIOutput(BaseModel):
     role: Optional[str] = None
     content: Optional[OpenAIContent] = None
 
-class OpenAIStandarResponse(BaseModel):
+class OpenAIStandardResponse(BaseModel):
     id: Optional[str] = None
     model: str
     output: OpenAIOutput
