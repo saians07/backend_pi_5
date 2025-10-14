@@ -1,5 +1,6 @@
 # pylint: disable=C0114, W0511, R0912
 from math import ceil
+import re
 from fastapi import APIRouter
 from core.telegram import (
     BotMessageInput,
@@ -42,11 +43,17 @@ async def user_message_handler(message:BotMessage, bot: TelegramBot) -> None:
                     Ada yang ingin ditanyakan? -- ❤️‍🔥 {BOT_NAME}"
                 await bot.send_message_to_bot(chat_id, message=msg)
 
-            return await user_command_handler(message.entities, name, bot, chat_id)
+                return
+
+            await user_command_handler(message.entities, name, bot, chat_id)
 
         if chat_id not in [683639588, 7703746371]:
-            return f"Maaf, saat ini {BOT_NICKNAME} hanya melayani Berlin dan Swanti\
+            msg = f"Maaf, saat ini {BOT_NICKNAME} hanya melayani Berlin dan Swanti\
                 saja. -- ❤️‍🔥 {BOT_NAME}"
+
+            await bot.send_message_to_bot(chat_id, message=message)
+
+            return
 
         if message.text:
             msg = await text_message_handler(message)
@@ -57,9 +64,12 @@ async def user_message_handler(message:BotMessage, bot: TelegramBot) -> None:
                 message = msg[(idx*4000):idx_next]
                 if (idx+1) < chunks:
                     message += '--[Cont.]'
+                message = reserved_character_cleaner(message)
                 await bot.send_message_to_bot(chat_id, message=message)
 
-            return msg
+            return
+
+    return
 
 async def text_message_handler(message:BotMessage) -> str:
     """Handling every text message from users"""
@@ -79,3 +89,12 @@ async def user_command_handler(
             ingin tanyakan kepadaku! Aku, {BOT_NAME} akan berusaha bantu."
 
         await bot.send_message_to_bot(chat_id, message=msg)
+
+def reserved_character_cleaner(msg: str) -> str:
+    """Escape reserved character in markdownv2"""
+    reserved_chars = r'_*[]()~`>#+-=|{}.!'
+    regex = fr"([{re.escape(reserved_chars)}])"
+
+    escaped_msg = re.sub(regex, r'\\\1', msg)
+
+    return escaped_msg
