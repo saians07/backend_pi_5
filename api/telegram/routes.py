@@ -7,7 +7,7 @@ from core.telegram import (
     BASE_API
 )
 from core.logger import LOG
-from api.telegram import bot_assistant
+from api.telegram.bot_handler import bot_assistant
 
 async def get_bot(request: Request) -> TelegramBot:
     """Get state of the bot from main app"""
