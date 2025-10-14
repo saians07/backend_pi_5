@@ -1,9 +1,9 @@
 # pylint: disable=C0114
-from math import ceil
 from fastapi import APIRouter, status, HTTPException, Depends, Request
 from core.telegram import (
     BotMessageInput,
     TelegramBot,
+    BotWebhook,
     BASE_API
 )
 from core.logger import LOG
@@ -22,7 +22,10 @@ async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(ge
 
     await bot_assistant(payload, bot)
 
-    return HTTPException(status.HTTP_202_ACCEPTED, "Oke, your inquiry has been accepted. Please wait!")
+    return HTTPException(
+        status.HTTP_202_ACCEPTED,
+        "Oke, your inquiry has been accepted. Please wait!"
+    )
 
 @telegram_router.post("/set_webhook", status_code=status.HTTP_200_OK)
 async def set_telegram_webhook(dto: BotWebhook, bot: TelegramBot=Depends(get_bot)):

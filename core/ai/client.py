@@ -1,3 +1,4 @@
+# pylint: disable=W0718
 """
 Client module to handle basic AI thing
 """
@@ -45,7 +46,8 @@ async def base_command(base_url: str, model: str, user_parts: dict, \
                 type="message",
                 content=OpenAIContent(
                     type="output_text",
-                    text="Maaf saat ini sedang ada gangguan Internal. Silahkan coba beberapa saat lagi."
+                    text="Maaf saat ini sedang ada gangguan Internal.\
+                        Silahkan coba beberapa saat lagi."
                 )
             )
         )
