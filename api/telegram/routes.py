@@ -1,5 +1,6 @@
 # pylint: disable=C0114
 from fastapi import APIRouter, status, HTTPException, Depends, Request
+from sqlalchemy.orm import Session
 from core.telegram import (
     BotMessageInput,
     TelegramBot,
@@ -13,14 +14,17 @@ async def get_bot(request: Request) -> TelegramBot:
     """Get state of the bot from main app"""
     return request.app.state.bot
 
+async def get_db_session(request: Request) -> Session:
+    return request.app.state.dbsession
+
 telegram_router = APIRouter(prefix=f"{BASE_API}/telegram")
 
 @telegram_router.post("/webhook", status_code=status.HTTP_200_OK)
-async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(get_bot)):
+async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(get_bot), dbsession: Session=Depends(get_db_session)):
     """Endpoint where telegram will receive direct input for the bot!"""
     LOG.info("receiving new payload \n %s", payload)
 
-    await bot_assistant(payload, bot)
+    await bot_assistant(payload, bot, dbsession)
 
     return {
         'status': status.HTTP_202_ACCEPTED,
