@@ -2,6 +2,8 @@
 from math import ceil
 import re
 from fastapi import APIRouter
+from sqlalchemy.orm import Session
+from core.logger import LOG
 from core.telegram import (
     BotMessageInput,
     BotMessage,
@@ -12,33 +14,41 @@ from core.ai import (
     BOT_NICKNAME,
     BASE_PROMPT
 )
+from database.telegram import BotUserMapping
+from database.base import get_telegram_user
 from api.ai import ask_gemini
 
 router = APIRouter(prefix="/telegram", tags=["telegram"])
 
-async def bot_assistant(payload: BotMessageInput, bot: TelegramBot) -> None:
+async def bot_assistant(payload: BotMessageInput, bot: TelegramBot, dbsession: Session) -> None:
     """
         Process all input from users.
         Return only string data, None when there is no
     """
     if payload.message:
-        await user_message_handler(payload.message, bot)
+        LOG.info("Forwarding message to message handler ...")
+        await user_message_handler(payload.message, bot, dbsession)
 
     return
 
-async def user_message_handler(message:BotMessage, bot: TelegramBot) -> None:
+async def user_message_handler(message:BotMessage, bot: TelegramBot, dbsession: Session) -> None:
     """
         Handle message from users. String only return
     """
     if message.chat:
         chat_id = message.chat.id
+        user_id = message.from_.id
         if message.from_.username:
             name = message.from_.username
         else:
             name = message.from_.first_name
 
+        # do not put any return on this check since it must go through when the
+        # type is not bot_command
         if message.entities:
-            if message.entities[0].type_ == "bot_command":
+            bot_command = [ent.type_ == "bot_command" for ent in message.entities]
+            # we only care about bot_command
+            if any(bot_command):
                 if message.text == "/start":
                     msg = f"Halo {message.chat.first_name}. Aku {BOT_NAME} siap membantu kamu.\
                         Ada yang ingin ditanyakan? -- ❤️‍🔥 {BOT_NAME}"
@@ -50,11 +60,10 @@ async def user_message_handler(message:BotMessage, bot: TelegramBot) -> None:
 
                 return
 
-            return
-
-        if chat_id not in [683639588, 7703746371]:
-            msg = f"Maaf, saat ini {BOT_NICKNAME} hanya melayani Berlin dan Swanti\
-                saja. -- ❤️‍🔥 {BOT_NAME}"
+        if get_telegram_user(user_id, dbsession) is None:
+            LOG.info("Unauthorized user %s:%s is accessing data.", user_id, name)
+            msg = f"Maaf {name}, saat ini {BOT_NICKNAME} hanya melayani Berlin dan \
+                orang-orang tertentu saja. -- ❤️‍🔥 {BOT_NAME}"
 
             await bot.send_message_to_bot(chat_id, message=reserved_character_cleaner(msg))
 
