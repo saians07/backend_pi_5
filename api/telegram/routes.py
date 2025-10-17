@@ -1,4 +1,5 @@
 # pylint: disable=C0114
+from typing import AsyncGenerator
 from fastapi import APIRouter, status, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
 from core.telegram import (
@@ -8,14 +9,19 @@ from core.telegram import (
     BASE_API
 )
 from core.logger import LOG
+from database.base import DBSession
 from api.telegram.bot_handler import bot_assistant
 
 async def get_bot(request: Request) -> TelegramBot:
     """Get state of the bot from main app"""
     return request.app.state.bot
 
-async def get_db_session(request: Request) -> Session:
-    return request.app.state.dbsession
+async def get_db_session(request: Request) -> AsyncGenerator[Session, None]:
+    dbsession = DBSession()
+    try:
+        yield dbsession
+    finally:
+        dbsession.close()
 
 telegram_router = APIRouter(prefix=f"{BASE_API}/telegram")
 
