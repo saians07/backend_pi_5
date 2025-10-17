@@ -37,6 +37,13 @@ if curl -f -s --max-time 30 http://localhost:$NEXT_PORT/health; then
         docker compose --file docker_compose_$CURRENT.yml down
     fi
 
+    # cleaning up docker iamges
+    docker image prune -f
+    docker container prune -f
+
+    # run database migrations
+    docker exec -it backend_pi_5_$NEXT alembic upgrade head
+
     # install jq to parse json
     sudo apt install jq
 
