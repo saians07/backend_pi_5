@@ -36,7 +36,7 @@ class BotUserMapping(Base):
     __tablename__ = 'telegram_bot_user'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(BigInteger, unique=True)
+    user_tele_id: Mapped[int] = mapped_column(BigInteger, unique=True)
     user_name: Mapped[str] = mapped_column(String(100))
     is_allowed: Mapped[bool] = mapped_column(Boolean, default=True)
     created_datetime: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
