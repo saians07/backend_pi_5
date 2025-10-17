@@ -1,6 +1,9 @@
+"""
+    Handle all databases migration process
+"""
+
 import os
 import sys
-from logging.config import fileConfig
 
 from sqlalchemy import create_engine, pool
 
@@ -37,8 +40,12 @@ target_metadata = Base.metadata
 for table_name in target_metadata.tables:
     print(f"- {table_name}")
 
-# DATABASE_HOST = os.getenv("PI5_POSTGRES_DB_HOST", "localhost")
 DATABASE_HOST = "localhost"
+# DATABASE_HOST = os.getenv("PI5_POSTGRES_DB_HOST", "localhost")
+if os.getenv("PI5_GO_BACKEND_ENV", "DEVELOPMENT") == "DEVELOPMENT":
+    DATABASE_HOST = "localhost"
+elif os.getenv("PI5_GO_BACKEND_ENV", "DEVELOPMENT") == "PROODUCTION":
+    DATABASE_HOST = os.getenv("PI5_POSTGRES_DB_HOST", "postgres")
 DATABASE_USER = os.getenv("PI5_POSTGRES_DB_USER", "postgres")
 DATABASE_PWD = os.getenv("PI5_POSTGRES_DB_PWD", "password")
 DATABASE_PORT = os.getenv("PI5_POSTGRES_DB_PORT", "5432")
