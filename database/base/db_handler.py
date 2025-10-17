@@ -21,15 +21,15 @@ def get_telegram_user(
 ) -> BotUserMapping:
     user = dbsession.query(BotUserMapping).filter(
         BotUserMapping.user_tele_id == user_id
-    )
+    ).all()
+
     if len(user) != 1:
         return
 
     return user
 
 def insert_into_tele_chat_history(
-    payload: BotMessageInput, dbsession: Session,
-    role: str
+    payload: BotMessageInput, dbsession: Session, role: str
 ) -> None:
     user_id = payload.message.from_.id
     if get_telegram_user(payload.message.from_.id) is None:
@@ -44,8 +44,6 @@ def insert_into_tele_chat_history(
 
     return
 
-def BotUserSummary(
-    payload: BotMessageInput,
-    dbsession: Session
-) -> None:
-    user = dbsession.query()
+def BotUserSummary(payload: BotMessageInput, dbsession: Session) -> None:
+    # TODO: Simpan data bot user summary
+    pass
