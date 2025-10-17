@@ -10,13 +10,9 @@ BASE_URL_GEMINI = "https://generativelanguage.googleapis.com/v1beta/openai/"
 BASE_URL_OPEN_ROUTER = "https://openrouter.ai/api/v1"
 
 
-async def base_command(base_url: str, model: str, user_parts: dict, \
-    system_prompt: str, api_key: str=None) -> OpenAIStandardResponse:
+async def base_command(model: str, user_parts: dict, \
+    system_prompt: str, client: AsyncOpenAI) -> OpenAIStandardResponse:
     """Base command as a template for another AI function"""
-    client = AsyncOpenAI(
-        base_url=base_url,
-        api_key=api_key
-    )
     try:
         resp = await client.chat.completions.create(
             model=model,
