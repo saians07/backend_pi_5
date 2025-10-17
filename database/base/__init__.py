@@ -5,4 +5,4 @@ from database.base.client import (
     DATABASE_URL
 )
 from database.base.schema import Base
-from database.base.handler import get_telegram_user
+from database.base.db_handler import get_telegram_user
