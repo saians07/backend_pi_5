@@ -2,9 +2,10 @@
 from typing import Optional, List, Any
 from pydantic import BaseModel, Field
 
-class BotWebhook(BaseModel):
+class BotBasePayload(BaseModel):
     """Parsing Raw Webhook URL From User"""
-    url: str
+    url: Optional[str] = None
+    user_id: Optional[int] = None
 
 class BotChat(BaseModel):
     """Parsing key chat from message input"""
@@ -45,7 +46,7 @@ class BotEntities(BaseModel):
     length: int
     type_: str = Field(..., alias="type")
 
-class BotMessageBase(BaseModel):
+class UserMessageBase(BaseModel):
     """Parsing base message from message input"""
     message_id: int
     from_: BotFromUserInfo = Field(..., alias="from")
@@ -57,9 +58,9 @@ class BotMessageBase(BaseModel):
     caption: Optional[str] = None
     entities: Optional[List[BotEntities]] = None
 
-class BotMessage(BotMessageBase):
+class UserMessage(UserMessageBase):
     """When quote a reply, parsing the reply to message"""
-    reply_to_message: Optional[BotMessageBase] = None
+    reply_to_message: Optional[UserMessageBase] = None
 
 class BotMessageInput(BaseModel):
     """
@@ -67,13 +68,13 @@ class BotMessageInput(BaseModel):
         Source: https://core.telegram.org/bots/api#chatmemberupdated
     """
     update_id: int
-    message: Optional[BotMessage] = None
+    message: Optional[UserMessage] = None
     edited_message: Optional[Any] = None
     channel_post: Optional[Any] = None
     edited_channel_post: Optional[Any] = None
     business_connection: Optional[Any] = None
-    business_message: Optional[BotMessage] = None
-    edited_business_message: Optional[BotMessage] = None
+    business_message: Optional[UserMessage] = None
+    edited_business_message: Optional[UserMessage] = None
     deleted_business_message: Optional[Any] = None
     message_reaction: Optional[Any] = None
     message_reaction_count: Optional[Any] = None
@@ -90,7 +91,3 @@ class BotMessageInput(BaseModel):
     chat_join_request: Optional[Any] = None
     chat_boost: Optional[Any] = None
     removed_chat_boost: Optional[Any] = None
-
-class BotAddUserPayload(BaseModel):
-    """Model to parse register user payload"""
-    user_id: int
