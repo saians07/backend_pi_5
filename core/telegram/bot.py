@@ -17,7 +17,10 @@ if not BOT_TOKEN:
 if not BACKEND_URL:
     raise RuntimeError("Missing BACKEND_URL in env")
 
-bot_headers = {"Accept": "application/json"}
+bot_headers = {
+    "Accept": "application/json",
+    "Content-Type":"application/json"
+}
 
 class TelegramBot:
     """Bot Client"""
@@ -97,7 +100,7 @@ class TelegramBot:
         message = await self.client.post(
             f"{BASE_URL}/sendMessage",
             params={"chat_id": chat_id, "text": message, 'parse_mode': "MarkdownV2"},
-            headers={"Content-Type":"application/json"}
+            headers=bot_headers
         )
         if message.status_code != 200:
             raise HTTPException(message.status_code)
