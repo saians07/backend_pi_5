@@ -109,7 +109,7 @@ async def user_command_handler(
 
 def reserved_character_cleaner(msg: str) -> str:
     """Escape reserved character in markdownv2"""
-    reserved_chars = r'_*[]()~`>#+-=|{}.!'
+    reserved_chars = r'>#+-=|{}.!'
     regex = fr"([{re.escape(reserved_chars)}])"
 
     escaped_msg = re.sub(regex, r'\\\1', msg)
