@@ -1,8 +1,12 @@
 # pylint: disable=C0114
 import os
+from typing import Union
 from dotenv import load_dotenv
 import httpx
 from fastapi import HTTPException
+from core.telegram.schema import (
+    BotBasePayload, BotMessageInput
+)
 
 load_dotenv()
 
@@ -24,10 +28,16 @@ bot_headers = {
 
 class TelegramBot:
     """Bot Client"""
-    def __init__(self, client: httpx.AsyncClient):
+    def __init__(
+        self, client: httpx.AsyncClient,
+        payload: Union[
+            BotBasePayload, BotMessageInput
+        ]
+    ):
         """Bot constructor"""
         self.client = client
         self._name = ""
+        self.payload = payload
 
     async def get_name(self) -> str:
         """Get the name of the bot"""
