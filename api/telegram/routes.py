@@ -1,22 +1,27 @@
 # pylint: disable=C0114
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Union
 from fastapi import APIRouter, status, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
 from core.telegram import (
     BotMessageInput,
     TelegramBot,
-    BotWebhook,
+    BotBasePayload,
     BASE_API
 )
 from core.logger import LOG
 from database.base import DBSession
 from api.telegram.bot_handler import bot_assistant
 
-async def get_bot(request: Request) -> TelegramBot:
+async def get_bot(
+    request: Request,
+    payload: Union[BotBasePayload, BotMessageInput]=None
+) -> TelegramBot:
     """Get state of the bot from main app"""
-    return request.app.state.bot
+    httpx_client = request.app.state.httpx_client
+    bot = TelegramBot(client=httpx_client, payload=payload)
+    return bot
 
-async def get_db_session(request: Request) -> AsyncGenerator[Session, None]:
+async def get_db_session() -> AsyncGenerator[Session, None]:
     dbsession = DBSession()
     try:
         yield dbsession
@@ -38,9 +43,13 @@ async def telegram_webhook(payload: BotMessageInput, bot: TelegramBot=Depends(ge
     }
 
 @telegram_router.post("/set_webhook", status_code=status.HTTP_200_OK)
-async def set_telegram_webhook(dto: BotWebhook, bot: TelegramBot=Depends(get_bot)):
+async def set_telegram_webhook(payload: BotBasePayload=None, bot: TelegramBot=Depends(get_bot)):
     """Set the telegram webhook to new webhook"""
-    url = dto.url
+    # check if there is url in the payload
+    if not payload or not payload.url:
+        raise HTTPException(400)
+
+    url = payload.url
 
     # always use try catch block
     try:
@@ -49,13 +58,12 @@ async def set_telegram_webhook(dto: BotWebhook, bot: TelegramBot=Depends(get_bot
         if curr_webhook.get("result").get("url"):
             raise HTTPException(
                 400,
-                """
-                There is an active webhook attached to the bot. Delete it first!
-                """
+                "There is an active webhook attached to the bot. \
+                    Delete it first!"
             )
 
         # only set the webhook when there is no active webhook attached
-        is_webhooked = await bot.set_webhook(url)
+        is_webhooked = await bot.set_webhook()
         if not is_webhooked:
             raise HTTPException(400, "Bad Request!")
 
