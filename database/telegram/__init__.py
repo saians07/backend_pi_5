@@ -6,3 +6,6 @@ from database.telegram.schema import (
     BotUserMapping,
     BotUserSummary
 )
+from database.telegram.db_handler import (
+    get_telegram_user
+)
