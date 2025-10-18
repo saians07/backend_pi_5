@@ -1,3 +1,3 @@
 """Init for database/base"""
-from database.base.schema import Base
-from database.base.client import DBSession
+from database.internal.schema import Base
+from database.internal.client import DBSession
