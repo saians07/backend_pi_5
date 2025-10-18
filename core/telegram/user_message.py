@@ -2,8 +2,11 @@
     Handling message payload from user
 """
 from math import ceil
-from typing import Dict
+from typing import Dict, Any
+from datetime import timedelta, datetime
+from uuid import uuid1, uuid5
 import httpx
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
@@ -15,19 +18,36 @@ from core.ai import BOT_NAME, BOT_NICKNAME, BASE_PROMPT
 from database.telegram import (
     get_telegram_user,
     insert_unauthorized_telegram_access,
-    BotUserMessage
+    insert_into_telegram_chat_history,
+    BotUserMessage,
+    BotChatHistory
 )
 
 class MessagePayload(TelegramBot):
     def __init__(
         self, client: httpx.AsyncClient, payload: BotUserMessage,
-        dbsession: Session
+        update_id: int, dbsession: Session
     ):
         super().__init__(client, payload)
         self.name = self.payload.chat.first_name
         self.dbsession = dbsession
         self.user_tele_id = self.payload.chat.id
         self.valid_user = get_telegram_user(self.user_tele_id, dbsession) or None
+        self.update_id = update_id
+
+    async def session_id_generator(self, context: str) -> str | None:
+        """
+            Create session ID for each conversation.
+                * Session will be last for 5 minutes from the last conversation.
+                * If after 5 minutes, no activities from the users, session ID
+                  will be reset.
+        """
+        if self.valid_user is None:
+            return
+
+        session_id = uuid5(uuid1(), f'{context}').hex
+
+        return session_id
 
     async def ai_text_to_text_inquiry(
         self, async_ai_callback: callable, user_parts: Dict=None
@@ -87,6 +107,8 @@ class MessagePayload(TelegramBot):
         if self.valid_user is None:
             await self.unauthorized_access()
 
+        session_id = None
+
         LOG.info("User %s is requesting help.", self.name)
         msg = (
             f"Halo {self.name}. Kamu bisa bertanya apa saja yang kamu "
@@ -96,7 +118,32 @@ class MessagePayload(TelegramBot):
         await self.send_message_to_bot(message=msg)
         LOG.info("Done Sending the help!")
 
-        # TODO: insert to database
+        # check the last session date with the history
+        chat_history = (
+            self.dbsession.query(BotChatHistory)
+            .filter(BotChatHistory.user_id == self.valid_user.id)
+            .order_by(desc(BotChatHistory.created_datetime))
+            .limit(1)
+            .all()
+        )
+        
+        session_id = await self.session_id_generator("user bot command!")
+
+        if len(chat_history) > 0:
+            five_min = timedelta(minutes=5)
+            time_diff = abs(datetime.now() - chat_history[0].created_datetime)
+            if time_diff <= five_min:
+                session_id = chat_history[0].session_id
+
+        insert_into_telegram_chat_history(
+            update_id=self.update_id,
+            user_tele_id=self.user_tele_id,
+            text=self.payload.text,
+            role="user",
+            session_id=session_id
+        )
+
+        # insert_
 
         return
 

@@ -22,7 +22,7 @@ async def bot_assistant(payload: BotMessageInput, bot: TelegramBot, dbsession: S
         # if the payload has messages from user, then first create the object
         # this object will help us to work with
         user_message = MessagePayload(
-            bot.client, payload.message, dbsession=dbsession
+            bot.client, payload.message, payload.update_id, dbsession=dbsession
         )
 
         # handling entity
