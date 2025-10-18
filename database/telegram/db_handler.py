@@ -17,7 +17,7 @@ def get_telegram_user(
     if len(user) != 1:
         return
 
-    return user
+    return user[0]
 
 def insert_unauthorized_telegram_access(
     user_tele_id : int, text: str, dbsession: Session
@@ -32,21 +32,25 @@ def insert_unauthorized_telegram_access(
     return
 
 def insert_into_telegram_chat_history(
-    payload: BotMessageInput, dbsession: Session, role: str
+    update_id: int, user_tele_id: int,
+    text: str, role: str, session_id: str,
+    dbsession: Session, link_media: str=None
 ) -> None:
-    user_id = payload.message.from_.id
-    if get_telegram_user(payload.message.from_.id) is None:
-        return
+    user_ = get_telegram_user(user_tele_id, dbsession)
+
     chat_history = BotChatHistory(
-        update_id = payload.update_id,
-        user_id = user_id,
-        role = role
+        update_id=update_id,
+        user_id=user_.id,
+        session_id=session_id,
+        role=role,
+        text=text,
+        link_media=link_media
     )
     dbsession.add(chat_history)
     dbsession.commit()
 
     return
 
-def summary_telegram_user_activity(payload: BotMessageInput, dbsession: Session) -> None:
+def insert_telegram_user_summary(payload: BotMessageInput, dbsession: Session) -> None:
     # TODO: Simpan data bot user summary
     pass

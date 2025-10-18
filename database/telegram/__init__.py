@@ -12,5 +12,6 @@ from database.telegram.schema import (
 )
 from database.telegram.db_handler import (
     get_telegram_user,
-    insert_unauthorized_telegram_access
+    insert_unauthorized_telegram_access,
+    insert_into_telegram_chat_history
 )
