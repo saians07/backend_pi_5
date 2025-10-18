@@ -9,7 +9,13 @@ async def lifespan(app: FastAPI):
     """
         Preparing objects and clients for each fastapi worker
     """
-    httpx_client = httpx.AsyncClient()
+    httpx_client = httpx.AsyncClient(
+        timeout=httpx.Timeout(60.0, connect=10.0),
+        limits=httpx.Limits(
+            max_connections=30,
+            max_keepalive_connections=5
+        ),
+    )
     app.state.httpx_client = httpx_client
 
     yield
