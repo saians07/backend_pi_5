@@ -6,6 +6,7 @@ git pull
 
 cd ~/backend_pi_5
 cp ~/very_private_repo/.env .env
+cp ~/very_private_repo/ai_automer_google_sheets_sa.json berlin_service_account.json
 source .env
 docker pull ghcr.io/saians07/backend_pi_5:latest
 
@@ -60,7 +61,7 @@ if curl -f -s --max-time 30 http://localhost:$NEXT_PORT/health; then
     curl -X PUT "http://nginx.$BACKEND_URL/api/hosts/ed2557da-24bf-4fa1-8f8a-4a0761a1d8b5" \
         -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" \
         --data-raw "$RAW_DATA"
-    
+
     curl "https://nginx.$BACKEND_URL/api/nginx/reload" \
         -X 'POST' \
         -H 'accept: application/json' \
