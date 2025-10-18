@@ -1,9 +1,7 @@
 # pylint: disable=C0114
 from fastapi import FastAPI
-from api import (
-    telegram_router,
-    internal_router
-)
+from api.internal import internal_router
+from api.telegram import telegram_router
 from core.logger import LOG
 from utils.manager import lifespan
 
