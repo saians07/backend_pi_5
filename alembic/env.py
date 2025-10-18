@@ -14,11 +14,12 @@ project_root = os.path.join(alembic_dir, '..')
 sys.path.insert(0, project_root)
 
 from dotenv import load_dotenv
-from database.base import Base
+from database.internal import Base
 from database.telegram import (
     BotChatHistory,
     BotUserMapping,
-    BotUserSummary
+    BotUserSummary,
+    UnauthorizedUser
 )
 
 load_dotenv()
