@@ -2,6 +2,7 @@
     Handling message payload from user
 """
 from math import ceil
+from typing import Dict
 import httpx
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
@@ -9,106 +10,106 @@ from fastapi import HTTPException
 from core.logger import LOG
 
 from core.telegram.bot import TelegramBot
-from core.telegram.schema import BotUserMessage
 from core.ai import BOT_NAME, BOT_NICKNAME, BASE_PROMPT
 
-from database.telegram import get_telegram_user
-
-from api.ai import ask_gemini
+from database.telegram import (
+    get_telegram_user,
+    insert_unauthorized_telegram_access,
+    BotUserMessage
+)
 
 class MessagePayload(TelegramBot):
-    def __init__(self, client: httpx.AsyncClient, payload: BotUserMessage):
+    def __init__(
+        self, client: httpx.AsyncClient, payload: BotUserMessage,
+        dbsession: Session
+    ):
         super().__init__(client, payload)
+        self.name = self.payload.chat.first_name
+        self.dbsession = dbsession
+        self.user_tele_id = self.payload.chat.id
+        self.valid_user = get_telegram_user(self.user_tele_id, dbsession) or None
 
-    async def user_message_handler(self, dbsession: Session) -> None:
-        user_id = self.payload.from_.id
+    async def ai_text_to_text_inquiry(
+        self, async_ai_callback: callable, user_parts: Dict=None
+    ) -> None:
+        if self.valid_user is None:
+            await self.unauthorized_access()
 
-        # We simply use first name since not everyone set their username
-        # or complete name
-        name = self.payload.from_.first_name
-
-        valid_user = get_telegram_user(user_id, dbsession) or None
-
-        # do not put any return on this check.
-        # it must go through when the type is not bot command.
-        if self.payload.entities:
-            entities = self.payload.entities
-            bot_command = [
-                ent.type_ == "bot_command" for ent in entities
-            ]
-            if any(bot_command):
-                # except /start, reply everything using user_command_handler
-                if self.payload.text == "/start":
-                    msg = (
-                        f"Halo {name}. Aku {BOT_NAME} siap membantu. "
-                        f"Ada yang ingin ditanyakan? -- ❤️‍🔥 {BOT_NAME}"
-                    )
-                    await self.send_message_to_bot(
-                        message= msg
-                    )
-                    LOG.info("Done starting the chat!")
-                    return
-
-                if valid_user is not None:
-                    await self.user_command_handler(self.payload.text, name)
-                    return
-                else:
-                    await self.unauthorized_access(name, user_id)
-        
-        # now, we get a condition where this is just a casual message from users.
-        # Not a bot command
-        if valid_user is None:
-            await self.unauthorized_access(name, user_id)
-
-        if self.payload.text:
-            msg = await self.text_message_handler(self.payload.text, name)
-
-            chunks = ceil(len(msg)/4000)
-            LOG.info("Message from gemini: %s...", msg[0:100])
-            for idx in range(0,chunks):
-                idx_next = (idx + 1) * 4000 # telegram max accept 4000 character
-                msg = msg[(idx*4000):idx_next]
-                if (idx+1) < chunks:
-                    msg += '--[Cont.]'
-                await self.send_message_to_bot(message=msg)
-
-            return
-
-    async def text_message_handler(self, text: str, name: str):
-        user_parts = {
-            'role': "user",
-            'content': text
-        }
-        resp = await ask_gemini(
+        if user_parts is None:
+            user_parts = {
+                'role': "user",
+                'content': self.payload.text
+            }
+        resp = await async_ai_callback(
             user_parts,
-            BASE_PROMPT.format(BOT_NAME, name, BOT_NICKNAME)
+            BASE_PROMPT.format(BOT_NAME, self.name, BOT_NICKNAME)
         )
 
-        return resp.output.content.text
+        msg = resp.output.content.text
 
-    async def user_command_handler(
-        self, command: str, name: str
-    ) -> None:
-        """Handling user command other than start"""
-        if command == "/help":
-            msg = (
-                f"Halo {name}. Kamu bisa bertanya apa saja yang kamu "
-                f"ingin tanyakan kepadaku! Aku, {BOT_NAME} akan berusaha bantu."
-            )
+        chunks = ceil(len(msg)/4000)
 
-            await self.send_message_to_bot(
-                message=msg
-            )
-            LOG.info("Done Sending the help!")
-        
+        for idx in range(0,chunks):
+            idx_next = (idx + 1) * 4000 # telegram max accept 4000 character
+            msg = msg[(idx*4000):idx_next]
+            if (idx+1) < chunks:
+                msg += '--[Cont.]'
+            await self.send_message_to_bot(message=msg)
+
+        # TODO: insert to database
+
         return
 
-    async def unauthorized_access(self, name: str, user_id: int) -> HTTPException:
-        LOG.info("Unauthorized user %s:%s is accessing data.", user_id, name)
+    async def start_command_inquiry(self) -> None:
+        """Start session with user. Since this command has a fix and static
+        reply, we do not need to log the reply, we just log the user request"""
+        LOG.info("User %s is starting the chat", self.name)
         msg = (
-            f"Maaf {name}, saat ini {BOT_NICKNAME} hanya melayani Berlin dan "
+            f"Halo {self.name}. Aku {BOT_NAME} siap membantu. "
+            f"Ada yang ingin ditanyakan? Kamu juga bisa tekan"
+            f"/help untuk bantuan. \n\n-- ❤️‍🔥 {BOT_NAME}"
+        )
+        await self.send_message_to_bot(message= msg)
+        LOG.info("Done introducing the bot...")
+
+        if self.valid_user is None:
+            insert_unauthorized_telegram_access(
+                self.user_tele_id, self.payload.text, self.dbsession
+            )
+
+        return
+
+    async def help_command_inquiry(self) -> None:
+        """
+            Help user using the bot. Since the command returns fix and static
+            reply, we don't need to log the reply, just log the user request.
+        """
+        if self.valid_user is None:
+            await self.unauthorized_access()
+
+        LOG.info("User %s is requesting help.", self.name)
+        msg = (
+            f"Halo {self.name}. Kamu bisa bertanya apa saja yang kamu "
+            f"ingin tanyakan kepadaku! Aku, {BOT_NAME} akan berusaha bantu."
+            f"\n-- ❤️‍🔥 {BOT_NAME}"
+        )
+        await self.send_message_to_bot(message=msg)
+        LOG.info("Done Sending the help!")
+
+        # TODO: insert to database
+
+        return
+
+    async def unauthorized_access(self) -> HTTPException:
+        LOG.info("Unauthorized user %s:%s is accessing data.", self.user_tele_id, self.name)
+        msg = (
+            f"Maaf {self.name}, saat ini {BOT_NICKNAME} hanya melayani Berlin dan "
             f"orang-orang tertentu saja. -- ❤️‍🔥 {BOT_NAME}"
         )
         await self.send_message_to_bot(message= msg)
+
+        insert_unauthorized_telegram_access(
+            self.user_tele_id, self.payload.text, self.dbsession
+        )
 
         raise HTTPException(403)
