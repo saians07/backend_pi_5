@@ -2,10 +2,15 @@
 Init file for telegram bot chat
 """
 from database.telegram.schema import (
+    BotBasePayload,
+    BotMessageInput,
+    BotUserMessage,
     BotChatHistory,
     BotUserMapping,
-    BotUserSummary
+    BotUserSummary,
+    UnauthorizedUser
 )
 from database.telegram.db_handler import (
-    get_telegram_user
+    get_telegram_user,
+    insert_unauthorized_telegram_access
 )

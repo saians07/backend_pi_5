@@ -3,13 +3,15 @@ from typing import AsyncGenerator, Union
 from fastapi import APIRouter, status, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
 from core.telegram import (
-    BotMessageInput,
     TelegramBot,
-    BotBasePayload,
     BASE_API
 )
 from core.logger import LOG
-from database.base import DBSession
+from database.internal import DBSession
+from database.telegram import (
+    BotMessageInput,
+    BotBasePayload
+)
 from api.telegram.bot_handler import bot_assistant
 
 async def get_bot(
@@ -58,8 +60,10 @@ async def set_telegram_webhook(payload: BotBasePayload=None, bot: TelegramBot=De
         if curr_webhook.get("result").get("url"):
             raise HTTPException(
                 400,
-                "There is an active webhook attached to the bot. \
-                    Delete it first!"
+                (
+                    "There is an active webhook attached to the bot "
+                    "Delete it first!"
+                )
             )
 
         # only set the webhook when there is no active webhook attached

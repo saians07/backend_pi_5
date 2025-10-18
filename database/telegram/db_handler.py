@@ -2,13 +2,14 @@ from sqlalchemy.orm import Session
 from database.telegram.schema import (
     BotChatHistory,
     BotUserMapping,
-    BotUserSummary
+    BotMessageInput,
+    BotUserSummary,
+    UnauthorizedUser
 )
-from core.telegram.schema import BotMessageInput
 
 def get_telegram_user(
     user_tele_id: int, dbsession: Session
-) -> BotUserMapping:
+) -> BotUserMapping | None:
     user = dbsession.query(BotUserMapping).filter(
         BotUserMapping.user_tele_id == user_tele_id
     ).all()
@@ -18,7 +19,19 @@ def get_telegram_user(
 
     return user
 
-def insert_into_tele_chat_history(
+def insert_unauthorized_telegram_access(
+    user_tele_id : int, text: str, dbsession: Session
+) -> None:
+    unauthorize = UnauthorizedUser(
+        user_tele_id=user_tele_id,
+        text=text
+    )
+    dbsession.add(unauthorize)
+    dbsession.commit()
+    
+    return
+
+def insert_into_telegram_chat_history(
     payload: BotMessageInput, dbsession: Session, role: str
 ) -> None:
     user_id = payload.message.from_.id
@@ -34,6 +47,6 @@ def insert_into_tele_chat_history(
 
     return
 
-def summary_user_activity(payload: BotMessageInput, dbsession: Session) -> None:
+def summary_telegram_user_activity(payload: BotMessageInput, dbsession: Session) -> None:
     # TODO: Simpan data bot user summary
     pass

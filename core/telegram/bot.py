@@ -4,7 +4,7 @@ from typing import Union
 from dotenv import load_dotenv
 import httpx
 from fastapi import HTTPException
-from core.telegram.schema import (
+from database.telegram import (
     BotUserMessage, BotMessageInput, BotBasePayload
 )
 from core.logger import LOG
