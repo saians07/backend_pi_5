@@ -5,8 +5,11 @@ from dotenv import load_dotenv
 import httpx
 from fastapi import HTTPException
 from core.telegram.schema import (
-    BotBasePayload, BotMessageInput
+    BotUserMessage, BotMessageInput, BotBasePayload
 )
+from core.logger import LOG
+
+from utils import telegram_message_escaper, telegram_message_smart_escaper
 
 load_dotenv()
 
@@ -31,7 +34,7 @@ class TelegramBot:
     def __init__(
         self, client: httpx.AsyncClient,
         payload: Union[
-            BotBasePayload, BotMessageInput
+            BotUserMessage, BotMessageInput, BotBasePayload
         ]
     ):
         """Bot constructor"""
@@ -53,12 +56,16 @@ class TelegramBot:
         except HTTPException as e:
             raise e
 
-    async def set_webhook(self, url: str) -> bool:
+    async def set_webhook(self) -> bool:
         """
         Assign a webhook into our bot. Afer assigning
         """
         try:
-            r = await self.client.post(f"{BASE_URL}/setWebhook", params={'url': url}, timeout=5.0)
+            r = await self.client.post(
+                f"{BASE_URL}/setWebhook",
+                params={'url': self.payload.url},
+                timeout=5.0
+            )
             r.raise_for_status()
             data = r.json()
             return data.get("ok", False)
@@ -104,15 +111,56 @@ class TelegramBot:
         img_data = img_response.content
         return img_data
 
+    async def get_chat_id(self):
+        """
+            Payload can be either:
+                BotUserMessage,
+                BotMessageInput,
+                BotBasePayload
+            For each object, the chat id might be availabe or not available.
+            Hence, we have to be careful and check the type when extracting it.
+        """
+        chat_id = None
+        if isinstance(self.payload, BotUserMessage):
+            chat_id = self.payload.chat.id
+        elif isinstance(self.payload, BotMessageInput):
+            chat_id = self.payload.message.chat.id
+        elif isinstance(self.payload, BotBasePayload):
+            raise ValueError("Payload of BotUserMessage, has not chat_id")
+        
+        return chat_id
 
-    async def send_message_to_bot(self, chat_id: str, message: str) -> dict | HTTPException:
+
+    async def send_message_to_bot(self, message: str) -> dict | HTTPException:
         """Send back message to bot"""
-        message = await self.client.post(
+        LOG.info("Sending message to user: %s...", message[0:100])
+        text = await telegram_message_smart_escaper(message)
+        LOG.info("%s", text)
+        text = await self.client.post(
             f"{BASE_URL}/sendMessage",
-            params={"chat_id": chat_id, "text": message, 'parse_mode': "MarkdownV2"},
+            params={
+                "chat_id": await self.get_chat_id(),
+                "text": text,
+                'parse_mode': "MarkdownV2"
+            },
             headers=bot_headers
         )
-        if message.status_code != 200:
-            raise HTTPException(message.status_code)
+        LOG.info("%s", text.content)
+        if text.status_code != 200:
+            text = await telegram_message_escaper(message)
+            text = await self.client.post(
+                f"{BASE_URL}/sendMessage",
+                params={
+                    "chat_id": await self.get_chat_id(),
+                    "text": text,
+                    'parse_mode': "MarkdownV2"
+                },
+                headers=bot_headers
+            )
+            
+        if text.status_code != 200:
+            raise HTTPException(message.status_code, "Error sending message to users.")
 
-        return message.json()
+        LOG.info("Done sending message to user.")
+
+        return text.json()
