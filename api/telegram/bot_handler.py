@@ -18,7 +18,7 @@ async def bot_assistant(payload: BotMessageInput, bot: TelegramBot, dbsession: S
     if payload.message:
         LOG.info("Forwarding message to message handler ...")
         user_message = MessagePayload(bot.client, payload.message)
-        if user_message.payload.message.chat:
+        if user_message.payload.chat:
             await user_message.user_message_handler(dbsession)
         return
 
